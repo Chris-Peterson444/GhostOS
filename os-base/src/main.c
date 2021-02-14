@@ -7,6 +7,7 @@ void timer_callback(void);
 volatile int gmodeCounter = 0;
 void graphics_callback(void);
 
+#define GRPAHICS_MODE (*((volatile uint32_t *)0x500FF414))
 
 volatile char *VIDEO_MEMORY = (volatile char *)(0x50000000 + 0xFE800);
 int main() {
@@ -119,6 +120,8 @@ void timer_callback(void){
 
 __attribute__((always_inline)) inline void graphics_callback(void){
     gmodeCounter += 1;
+    uint32_t intermediate = GRPAHICS_MODE & (uint32_t) 0x1;
+    if ( intermediate == (uint32_t) 0x0){
     int cur_count = gmodeCounter % 30;
     switch(cur_count){
         case 1:
@@ -180,5 +183,7 @@ __attribute__((always_inline)) inline void graphics_callback(void){
             break;
 
     }
+    }
+    
 
 }

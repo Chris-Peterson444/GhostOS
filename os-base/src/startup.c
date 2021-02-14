@@ -178,9 +178,9 @@ void c_interrupt_handler(void){
             timer_ISR();
             break;
         case 11:
-            csr_disable_interrupts();
+        csr_disable_interrupts();
             external_ISR();
-            csr_enable_interrupts();
+        csr_enable_interrupts();
             break;
         default:
         break;
@@ -189,20 +189,26 @@ void c_interrupt_handler(void){
  
 }
 
-void external_ISR(uint32_t fid){
+void external_ISR (uint32_t fid){
         
     if (INT_PEND & (uint32_t) 0x4){
+
         if(timerIgnore){
             timerIgnore = 0;
         }
         else{
             timerIgnore = 1;
         }
+
         CMD_interrupt_clear();
     }
     else if (INT_PEND & (uint32_t) 0x2){
         graphics_ISR();
         VID_interrupt_clear();
+    }
+    else if (INT_PEND & (uint32_t) 0x1){
+        timerIgnore = 0;
+        CART_interrupt_clear();
     }
 
 
