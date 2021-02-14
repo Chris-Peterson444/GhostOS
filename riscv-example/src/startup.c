@@ -39,6 +39,7 @@ __attribute__((always_inline)) inline uint32_t csr_mcause_read(void){
 
 
 
+
 #define MTIME_LOW       (*((volatile uint32_t *)0x40000008))
 #define MTIME_HIGH      (*((volatile uint32_t *)0x4000000C))
 #define MTIMECMP_LOW    (*((volatile uint32_t *)0x40000010))
@@ -47,6 +48,7 @@ __attribute__((always_inline)) inline uint32_t csr_mcause_read(void){
 #define CARTRIDGE       (*((volatile uint32_t *)0x4000001C))
 #define INT_EN          (*((volatile uint32_t *)0x40000000))
 #define INT_PEND        (*((volatile uint32_t *)0x40000004))
+#define GRAPHICS_MODE   (*((volatile uint32_t *)0x500FF414))
 
 
 
@@ -83,6 +85,19 @@ __attribute__((always_inline)) inline void CART_interrupt_clear(void){
     INT_PEND = INT_PEND | (uint32_t) 0x1;
 }
 
+__attribute__((always_inline)) inline void graphics_text_mode(void){
+    GRAPHICS_MODE = GRAPHICS_MODE & (uint32_t) 0x0;
+}
+
+__attribute__((always_inline)) inline void graphics_graphic_mode(void){
+    GRAPHICS_MODE = GRAPHICS_MODE | (uint32_t) 0x1;
+}
+
+__attribute__((always_inline)) inline void graphics_refresh_rate(uint32_t rate){
+    uint32_t mask = 0x64 | 0x1;
+    GRAPHICS_MODE = GRAPHICS_MODE & (uint32_t) mask;
+}
+
 
 void init(void){
     uint8_t *Source = _erodata;
@@ -103,14 +118,17 @@ void init(void){
     MTIMECMP_LOW = 100;
     MTIMECMP_HIGH = 0;
     external_enable_all_interrupts(); //Enable all external interrupts
+    graphics_refresh_rate(0x5A);
+    // graphics_text_mode();
 }
 int pressed = 1;
 extern volatile int global;
 extern volatile uint32_t controller_status;
+extern void graphics_callback(void);
 extern void timer_callback(void);
 volatile int timerIgnore = 1;
 __attribute__((always_inline)) inline void timer_ISR(void);
-void graphics_ISR(void);
+__attribute__((always_inline)) inline void graphics_ISR(void);
 void external_ISR();
 void cmd_ISR(void);
 
@@ -160,7 +178,9 @@ void c_interrupt_handler(void){
             timer_ISR();
             break;
         case 11:
+            csr_disable_interrupts();
             external_ISR();
+            csr_enable_interrupts();
             break;
         default:
         break;
@@ -178,13 +198,22 @@ void external_ISR(uint32_t fid){
         else{
             timerIgnore = 1;
         }
+        CMD_interrupt_clear();
     }
-    CMD_interrupt_clear();
+    else if (INT_PEND & (uint32_t) 0x2){
+        graphics_ISR();
+        VID_interrupt_clear();
+    }
+
 
 
 
 }
 
+
+__attribute__((always_inline)) inline void graphics_ISR(void){
+    graphics_callback();
+}
 
 
 void timer_ISR(void){
