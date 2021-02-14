@@ -49,6 +49,7 @@ __attribute__((always_inline)) inline uint32_t csr_mcause_read(void){
 #define INT_EN          (*((volatile uint32_t *)0x40000000))
 #define INT_PEND        (*((volatile uint32_t *)0x40000004))
 #define GRAPHICS_MODE   (*((volatile uint32_t *)0x500FF414))
+#define CART_STATUS     (*((volatile uint32_t *)0x4000001C))
 
 
 
@@ -207,8 +208,21 @@ void external_ISR (uint32_t fid){
         VID_interrupt_clear();
     }
     else if (INT_PEND & (uint32_t) 0x1){
-        timerIgnore = 0;
-        CART_interrupt_clear();
+        // timerIgnore = 1;
+        // graphics_graphic_mode();
+        uint32_t jmp_point = CART_STATUS;
+        jmp_point = jmp_point & (uint32_t) 0xFFFFFFFC;
+        void (*foo)() = jmp_point;
+        foo();
+        // CART_interrupt_clear();
+        
+        // asm("jal ra, %0" : : "r"(jmp_point));
+        // asm volatile ("call %0" : : "r"(jmp_point));
+        // asm("call 0x20000000");
+        
+        // foo = CART_STATUS;
+        
+
     }
 
 

@@ -142,7 +142,7 @@ __attribute__((always_inline)) inline void graphics_callback(void){
             VIDEO_MEMORY[3 + 64*15] = 'N';
             VIDEO_MEMORY[4 + 64*15] = 'G';
             VIDEO_MEMORY[5 + 64*15] = 'E';
-            VIDEO_MEMORY[6 + 63*15] = ' ';
+            VIDEO_MEMORY[6 + 64*15] = ' ';
             VIDEO_MEMORY[7 + 64*15] = ' ';
             VIDEO_MEMORY[8 + 64*15] = ' ';
             break;

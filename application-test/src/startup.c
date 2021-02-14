@@ -112,13 +112,13 @@ void init(void){
     while(Base < End){
         *Base++ = 0;
     }
-
+    CART_interrupt_clear();
     csr_write_mie(0x888);       // Enable all interrupt soruces
     csr_enable_interrupts();    // Global interrupt enable
-    MTIMECMP_LOW = 100;
-    MTIMECMP_HIGH = 0;
-    external_enable_all_interrupts(); //Enable all external interrupts
-    graphics_refresh_rate(0x5A);
+    // MTIMECMP_LOW = 100;
+    // MTIMECMP_HIGH = 0;
+    // external_enable_all_interrupts(); //Enable all external interrupts
+    // graphics_refresh_rate(0x5A);
     // graphics_text_mode();
 }
 int pressed = 1;
@@ -141,7 +141,7 @@ void cmd_ISR(void);
 //     controller_status = CONTROLLER;
 // }
 
-void c_interrupt_handler(void){
+void c_interrupt_handler_2(void){
 
     //Check mcause reg
     uint32_t mcause_reg = csr_mcause_read();
@@ -203,6 +203,9 @@ void external_ISR(uint32_t fid){
     else if (INT_PEND & (uint32_t) 0x2){
         graphics_ISR();
         VID_interrupt_clear();
+    }
+    else if (INT_PEND & (uint32_t) 0x1){
+        CART_interrupt_clear();
     }
 
 
