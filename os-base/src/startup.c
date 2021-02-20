@@ -1,4 +1,6 @@
 #include <stdint.h>
+#include "ChipsetRegisters.h"
+#include "VideoControllerMap.h"
 
 extern uint8_t _erodata[];
 extern uint8_t _data[];
@@ -40,63 +42,63 @@ __attribute__((always_inline)) inline uint32_t csr_mcause_read(void){
 
 
 
-#define MTIME_LOW       (*((volatile uint32_t *)0x40000008))
-#define MTIME_HIGH      (*((volatile uint32_t *)0x4000000C))
-#define MTIMECMP_LOW    (*((volatile uint32_t *)0x40000010))
-#define MTIMECMP_HIGH   (*((volatile uint32_t *)0x40000014))
-#define CONTROLLER      (*((volatile uint32_t *)0x40000018))
-#define CARTRIDGE       (*((volatile uint32_t *)0x4000001C))
-#define INT_EN          (*((volatile uint32_t *)0x40000000))
-#define INT_PEND        (*((volatile uint32_t *)0x40000004))
-#define GRAPHICS_MODE   (*((volatile uint32_t *)0x500FF414))
-#define CART_STATUS     (*((volatile uint32_t *)0x4000001C))
+// #define MTIME_LOW       (*((volatile uint32_t *)0x40000008))
+// #define MTIME_HIGH      (*((volatile uint32_t *)0x4000000C))
+// #define MTIMECMP_LOW    (*((volatile uint32_t *)0x40000010))
+// #define MTIMECMP_HIGH   (*((volatile uint32_t *)0x40000014))
+// #define CONTROLLER_STATUS      (*((volatile uint32_t *)0x40000018))
+// #define CARTRIDGE       (*((volatile uint32_t *)0x4000001C))
+// #define INTERRUPT_ENABLE          (*((volatile uint32_t *)0x40000000))
+// #define INTERRUPT_PENDING        (*((volatile uint32_t *)0x40000004))
+// #define GRAPHICS_MODE_CONTROL   (*((volatile uint32_t *)0x500FF414))
+// #define CARTRIDGE_STATUS     (*((volatile uint32_t *)0x4000001C))
 
 
 
 __attribute__((always_inline)) inline void external_enable_all_interrupts(void){
-    INT_EN = (uint32_t) 0x37;
+    INTERRUPT_ENABLE = (uint32_t) 0x37;
 }
 
 __attribute__((always_inline)) inline void external_enable_CMD_interrupt(void){
-    INT_EN = (uint32_t) 0x4;
+    INTERRUPT_ENABLE = (uint32_t) 0x4;
 }
 
 __attribute__((always_inline)) inline void external_enable_VID_interrupts(void){
-    INT_EN = (uint32_t) 0x2;
+    INTERRUPT_ENABLE = (uint32_t) 0x2;
 }
 
 __attribute__((always_inline)) inline void external_enable_CART_interrupts(void){
-    INT_EN = (uint32_t) 0x1;
+    INTERRUPT_ENABLE = (uint32_t) 0x1;
 }
 
 __attribute__((always_inline)) inline void external_interrupt_clear(uint32_t val){
-   uint32_t temp = INT_PEND;
-    INT_PEND = temp | val;
+   uint32_t temp = INTERRUPT_PENDING;
+    INTERRUPT_PENDING = temp | val;
 }
 
 __attribute__((always_inline)) inline void CMD_interrupt_clear(void){
-    INT_PEND = INT_PEND | (uint32_t) 0x4;
+    INTERRUPT_PENDING = INTERRUPT_PENDING | (uint32_t) 0x4;
 }
 
 __attribute__((always_inline)) inline void VID_interrupt_clear(void){
-    INT_PEND = INT_PEND | (uint32_t) 0x2;
+    INTERRUPT_PENDING = INTERRUPT_PENDING | (uint32_t) 0x2;
 }
 
 __attribute__((always_inline)) inline void CART_interrupt_clear(void){
-    INT_PEND = INT_PEND | (uint32_t) 0x1;
+    INTERRUPT_PENDING = INTERRUPT_PENDING | (uint32_t) 0x1;
 }
 
 __attribute__((always_inline)) inline void graphics_text_mode(void){
-    GRAPHICS_MODE = GRAPHICS_MODE & (uint32_t) 0x0;
+    GRAPHICS_MODE_CONTROL = GRAPHICS_MODE_CONTROL & (uint32_t) 0x0;
 }
 
 __attribute__((always_inline)) inline void graphics_graphic_mode(void){
-    GRAPHICS_MODE = GRAPHICS_MODE | (uint32_t) 0x1;
+    GRAPHICS_MODE_CONTROL = GRAPHICS_MODE_CONTROL | (uint32_t) 0x1;
 }
 
 __attribute__((always_inline)) inline void graphics_refresh_rate(uint32_t rate){
     uint32_t mask = 0x64 | 0x1;
-    GRAPHICS_MODE = GRAPHICS_MODE & (uint32_t) mask;
+    GRAPHICS_MODE_CONTROL = GRAPHICS_MODE_CONTROL & (uint32_t) mask;
 }
 
 
@@ -139,7 +141,7 @@ void cmd_ISR(void);
 //     MTIMECMP_HIGH = NewCompare>>32;
 //     MTIMECMP_LOW = NewCompare;
 //     global++;
-//     controller_status = CONTROLLER;
+//     controller_status = CONTROLLER_STATUS;
 // }
 
 void c_interrupt_handler(void){
@@ -157,7 +159,7 @@ void c_interrupt_handler(void){
     // // Check if an external interrupt
     // if (mcause_reg == (uint32_t) 11 ){
 
-    //     if( INT_PEND & (uint32_t) 0x4 ){
+    //     if( INTERRUPT_PENDING & (uint32_t) 0x4 ){
     //         pressed = 1;
     //     }
     //     // else{
@@ -192,7 +194,7 @@ void c_interrupt_handler(void){
 
 void external_ISR (uint32_t fid){
         
-    if (INT_PEND & (uint32_t) 0x4){
+    if (INTERRUPT_PENDING & (uint32_t) 0x4){
 
         if(timerIgnore){
             timerIgnore = 0;
@@ -203,14 +205,14 @@ void external_ISR (uint32_t fid){
 
         CMD_interrupt_clear();
     }
-    else if (INT_PEND & (uint32_t) 0x2){
+    else if (INTERRUPT_PENDING & (uint32_t) 0x2){
         graphics_ISR();
         VID_interrupt_clear();
     }
-    else if (INT_PEND & (uint32_t) 0x1){
+    else if (INTERRUPT_PENDING & (uint32_t) 0x1){
         // timerIgnore = 1;
         // graphics_graphic_mode();
-        uint32_t jmp_point = CART_STATUS;
+        uint32_t jmp_point = CARTRIDGE_STATUS;
         jmp_point = jmp_point & (uint32_t) 0xFFFFFFFC;
         void (*foo)() = jmp_point;
         foo();
@@ -220,7 +222,7 @@ void external_ISR (uint32_t fid){
         // asm volatile ("call %0" : : "r"(jmp_point));
         // asm("call 0x20000000");
         
-        // foo = CART_STATUS;
+        // foo = CARTRIDGE_STATUS;
         
 
     }
@@ -246,7 +248,7 @@ void timer_ISR(void){
     if(timerIgnore){
     timer_callback();
     global++;
-    controller_status = CONTROLLER;
+    controller_status = CONTROLLER_STATUS;
     }
     csr_enable_interrupts();
         // timer_callback();
