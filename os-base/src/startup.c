@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include "ChipsetRegisters.h"
 #include "VideoControllerMap.h"
+#include "StatusRegisterUtility.h"
 
 extern uint8_t _erodata[];
 extern uint8_t _data[];
@@ -11,47 +12,33 @@ extern uint8_t _bss[];
 extern uint8_t _ebss[];
 
 // Adapted from https://stackoverflow.com/questions/58947716/how-to-interact-with-risc-v-csrs-by-using-gcc-c-code
-__attribute__((always_inline)) inline uint32_t csr_mstatus_read(void){
-    uint32_t result;
-    asm volatile ("csrr %0, mstatus" : "=r"(result));
-    return result;
-}
+// __attribute__((always_inline)) inline uint32_t csr_mstatus_read(void){
+//     uint32_t result;
+//     asm volatile ("csrr %0, mstatus" : "=r"(result));
+//     return result;
+// }
 
-__attribute__((always_inline)) inline void csr_mstatus_write(uint32_t val){
-    asm volatile ("csrw mstatus, %0" : : "r"(val));
-}
+// __attribute__((always_inline)) inline void csr_mstatus_write(uint32_t val){
+//     asm volatile ("csrw mstatus, %0" : : "r"(val));
+// }
 
-__attribute__((always_inline)) inline void csr_write_mie(uint32_t val){
-    asm volatile ("csrw mie, %0" : : "r"(val));
-}
+// __attribute__((always_inline)) inline void csr_write_mie(uint32_t val){
+//     asm volatile ("csrw mie, %0" : : "r"(val));
+// }
 
-__attribute__((always_inline)) inline void csr_enable_interrupts(void){
-    asm volatile ("csrsi mstatus, 0x8");
-}
+// __attribute__((always_inline)) inline void csr_enable_interrupts(void){
+//     asm volatile ("csrsi mstatus, 0x8");
+// }
 
-__attribute__((always_inline)) inline void csr_disable_interrupts(void){
-    asm volatile ("csrci mstatus, 0x8");
-}
+// __attribute__((always_inline)) inline void csr_disable_interrupts(void){
+//     asm volatile ("csrci mstatus, 0x8");
+// }
 
-__attribute__((always_inline)) inline uint32_t csr_mcause_read(void){
-    uint32_t result;
-    asm volatile ("csrr %0, mcause" : "=r"(result));
-    return result;
-}
-
-
-
-
-// #define MTIME_LOW       (*((volatile uint32_t *)0x40000008))
-// #define MTIME_HIGH      (*((volatile uint32_t *)0x4000000C))
-// #define MTIMECMP_LOW    (*((volatile uint32_t *)0x40000010))
-// #define MTIMECMP_HIGH   (*((volatile uint32_t *)0x40000014))
-// #define CONTROLLER_STATUS      (*((volatile uint32_t *)0x40000018))
-// #define CARTRIDGE       (*((volatile uint32_t *)0x4000001C))
-// #define INTERRUPT_ENABLE          (*((volatile uint32_t *)0x40000000))
-// #define INTERRUPT_PENDING        (*((volatile uint32_t *)0x40000004))
-// #define GRAPHICS_MODE_CONTROL   (*((volatile uint32_t *)0x500FF414))
-// #define CARTRIDGE_STATUS     (*((volatile uint32_t *)0x4000001C))
+// __attribute__((always_inline)) inline uint32_t csr_mcause_read(void){
+//     uint32_t result;
+//     asm volatile ("csrr %0, mcause" : "=r"(result));
+//     return result;
+// }
 
 
 
