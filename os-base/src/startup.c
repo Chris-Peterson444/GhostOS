@@ -13,54 +13,6 @@ extern uint8_t _bss[];
 extern uint8_t _ebss[];
 
 
-
-// __attribute__((always_inline)) inline void external_enable_all_interrupts(void){
-//     INTERRUPT_ENABLE = (uint32_t) 0x37;
-// }
-
-// __attribute__((always_inline)) inline void external_enable_CMD_interrupt(void){
-//     INTERRUPT_ENABLE = (uint32_t) 0x4;
-// }
-
-// __attribute__((always_inline)) inline void external_enable_VID_interrupts(void){
-//     INTERRUPT_ENABLE = (uint32_t) 0x2;
-// }
-
-// __attribute__((always_inline)) inline void external_enable_CART_interrupts(void){
-//     INTERRUPT_ENABLE = (uint32_t) 0x1;
-// }
-
-// __attribute__((always_inline)) inline void external_interrupt_clear(uint32_t val){
-//    uint32_t temp = INTERRUPT_PENDING;
-//     INTERRUPT_PENDING = temp | val;
-// }
-
-// __attribute__((always_inline)) inline void CMD_interrupt_clear(void){
-//     INTERRUPT_PENDING = INTERRUPT_PENDING | (uint32_t) 0x4;
-// }
-
-// __attribute__((always_inline)) inline void VID_interrupt_clear(void){
-//     INTERRUPT_PENDING = INTERRUPT_PENDING | (uint32_t) 0x2;
-// }
-
-// __attribute__((always_inline)) inline void CART_interrupt_clear(void){
-//     INTERRUPT_PENDING = INTERRUPT_PENDING | (uint32_t) 0x1;
-// }
-
-// __attribute__((always_inline)) inline void graphics_text_mode(void){
-//     GRAPHICS_MODE_CONTROL = GRAPHICS_MODE_CONTROL & (uint32_t) 0x0;
-// }
-
-// __attribute__((always_inline)) inline void graphics_graphic_mode(void){
-//     GRAPHICS_MODE_CONTROL = GRAPHICS_MODE_CONTROL | (uint32_t) 0x1;
-// }
-
-// __attribute__((always_inline)) inline void graphics_refresh_rate(uint32_t rate){
-//     uint32_t mask = 0x64 | 0x1;
-//     GRAPHICS_MODE_CONTROL = GRAPHICS_MODE_CONTROL & (uint32_t) mask;
-// }
-
-
 void init(void){
     uint8_t *Source = _erodata;
     uint8_t *Base = _data < _sdata ? _data : _sdata;
@@ -83,6 +35,7 @@ void init(void){
     graphics_refresh_rate(0x5A);
     // graphics_text_mode();
 }
+
 int pressed = 1;
 extern volatile int global;
 extern volatile uint32_t controller_status;
