@@ -1,4 +1,4 @@
-.section .init, "ax"
+..section .init, "ax"
 .global _start
 _start:
     .cfi_startproc
@@ -9,10 +9,17 @@ _start:
     .option pop
     la sp, __stack_top
     add s0, sp, zero
-    la  a5, _interrupt_handler_2
-    csrw mtvec, a5
     jal ra, init
     nop
-    jal zero, main
+    jal ra, main
     .cfi_endproc
+
+
+.section .text, "ax"
+.global SystemCall, SystemCall2
+SystemCall:
+SystemCall2:
+    ecall
+    ret
+
     .end
