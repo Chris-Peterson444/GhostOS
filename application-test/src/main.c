@@ -7,6 +7,9 @@ void timer_callback(void);
 volatile int gmodeCounter = 0;
 void graphics_callback(void);
 
+uint32_t SystemCall(uint32_t param);
+uint32_t SystemCall2(uint32_t param1, uint32_t param2);
+
 
 volatile char *VIDEO_MEMORY = (volatile char *)(0x50000000 + 0xFE800);
 int main() {
