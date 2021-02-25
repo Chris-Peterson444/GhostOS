@@ -1,18 +1,18 @@
-
+#include "InterruptHandler.h"
 #include "StatusRegisterUtility.h"
 #include "InterruptMask.h"
 
 
 int pressed = 1;
-extern volatile int global;
-extern volatile uint32_t controller_status;
 extern void graphics_callback(void);
 extern void timer_callback(void);
-volatile int timerIgnore = 1;
-__attribute__((always_inline)) inline void timer_ISR(void);
-__attribute__((always_inline)) inline void graphics_ISR(void);
 void external_ISR();
 void cmd_ISR(void);
+// volatile int timerIgnore = 1;
+// __attribute__((always_inline)) inline void timer_ISR(void);
+__attribute__((always_inline)) inline void graphics_ISR(void){
+    graphics_callback();
+}
 
 uint32_t c_syscall(uint32_t param){
  
@@ -52,12 +52,6 @@ inline void external_ISR (void){
     if (INTERRUPT_PENDING & CMD_MASK){
 
     	//Do short work
-        if(timerIgnore){
-            timerIgnore = 0;
-        }
-        else{
-            timerIgnore = 1;
-        }
 
         //Clear interrupt
         CMD_interrupt_clear();
@@ -67,40 +61,16 @@ inline void external_ISR (void){
         VID_interrupt_clear();
     }
     else if (INTERRUPT_PENDING & CART_MASK){
-       
-        uint32_t jmp_point = CARTRIDGE_STATUS & (uint32_t) 0xFFFFFFFC;
-        
-        void (*jump)() =  jmp_point;
 
+    	// Get entry point
+        uint32_t jmp_point = CARTRIDGE_STATUS & (uint32_t) 0xFFFFFFFC;
+        // Make a function pointer and jump
+        void (*jump)() =  jmp_point;
         jump();
         
         
 
     }
 
-
-
-
 }
 
-
-__attribute__((always_inline)) inline void graphics_ISR(void){
-    graphics_callback();
-}
-
-
-void timer_ISR(void){
-
-    uint64_t NewCompare = (((uint64_t)MTIMECMP_HIGH)<<32) | MTIMECMP_LOW;
-    NewCompare += 200;
-    MTIMECMP_HIGH = NewCompare>>32;
-    MTIMECMP_LOW = NewCompare;
-   
-    if(timerIgnore){
-	    timer_callback();
-	    global++;
-	    controller_status = CONTROLLER_STATUS;
-    }
- 
-
-}
