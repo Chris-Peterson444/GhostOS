@@ -13,6 +13,7 @@ INC_DIR = ./include
 SRC_DIR = ./src
 OBJ_DIR = ./obj
 BIN_DIR = ./bin
+# LIB_DIR = ./lib/build_newlib
 
 DEBUG_MODE=TRUE
 
@@ -25,8 +26,10 @@ CFLAGS   += -O3
 endif
 
 LDFILE   = riscv32-console.ld
+# INCLUDE  += -I $(INC_DIR) -L $(LIB_DIR)
 INCLUDE  += -I $(INC_DIR)
-CFLAGS   += -ffreestanding  -nostartfiles -nostdlib -nodefaultlibs
+CFLAGS   += -ffreestanding  -nostartfiles
+# CFLAGS   += -ffreestanding  -nostartfiles -nostdlib -nodefaultlibs
 LDFLAGS  +=
 LDFLAGS  += -Wl,--gc-sections -Wl,-T,$(LDFILE)
 
@@ -37,7 +40,28 @@ TARGET_OBJS = 	$(OBJ_DIR)/main.o               \
                 $(OBJ_DIR)/interrupt.o          \
                 $(OBJ_DIR)/startup.o            \
                 $(OBJ_DIR)/InterruptHandler.o   \
-                $(OBJ_DIR)/TimerISR.o
+                $(OBJ_DIR)/TimerISR.o           
+
+NEWLIB_OBJS =   $(OBJ_DIR)/close.o              \
+				$(OBJ_DIR)/environ.o            \
+				$(OBJ_DIR)/execve.o             \
+				$(OBJ_DIR)/fork.o               \
+				$(OBJ_DIR)/fstat.o              \
+				$(OBJ_DIR)/getpid.o             \
+				$(OBJ_DIR)/isatty.o             \
+				$(OBJ_DIR)/kill.o               \
+				$(OBJ_DIR)/link.o               \
+				$(OBJ_DIR)/lseek.o              \
+				$(OBJ_DIR)/open.o               \
+				$(OBJ_DIR)/read.o               \
+				$(OBJ_DIR)/sbrk.o               \
+				$(OBJ_DIR)/stat.o               \
+				$(OBJ_DIR)/times.o              \
+				$(OBJ_DIR)/unlink.o             \
+				$(OBJ_DIR)/wait.o               \
+				$(OBJ_DIR)/write.o
+
+TARGET_OBJS += $(NEWLIB_OBJS)
 
 all: directories $(BIN_DIR)/$(TARGET_NAME)
 
@@ -45,15 +69,23 @@ $(BIN_DIR)/$(TARGET_NAME): $(TARGET_OBJS)
 	$(CC) $(TARGET_OBJS) -o $(BIN_DIR)/$(TARGET_NAME) $(CFLAGS) $(DEFINES) $(LDFLAGS) 
 	$(STRIP) $(BIN_DIR)/$(TARGET_NAME) -o $(BIN_DIR)/$(TARGET_NAME).strip
 
+# Build all assembly files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.s
 	$(CC) $(CFLAGS) $(DEFINES) $(INCLUDE) -c $< -o $@
 
+# Build all C files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) $(DEFINES) $(INCLUDE) -c $< -o $@
 
+# Build all cpp files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CXX) $(CFLAGS) $(DEFINES) $(INCLUDE) -c $< -o $@
-	
+
+# Build all newlib interface files
+$(OBJ_DIR)/%.o: $(SRC_DIR)/NewLibInterface/%.c
+	$(CC) $(CFLAGS) $(DEFINES) $(INCLUDE) -c $< -o $@
+
+
 directories: $(OBJ_DIR) $(BIN_DIR)
 
 $(OBJ_DIR):

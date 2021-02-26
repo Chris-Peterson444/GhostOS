@@ -1,4 +1,6 @@
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 volatile int global = 42;
 volatile uint32_t controller_status = 0;
@@ -40,14 +42,17 @@ int main() {
     // VIDEO_MEMORY[10 + 64*2] = 'd';
     // VIDEO_MEMORY[11 + 64*2] = '!';
     // VIDEO_MEMORY[12 + 64*2] = 'X';
-    
-
+    // int *test = malloc(sizeof(int));
+    printf("test");
+    char* test_mem = (char *) malloc(sizeof('a'));
+    *test_mem = 'a';
 
     while (1) {
         int c = a + b + global;
         if(global != last_global){
             int cur_time = time / 10;
             VIDEO_MEMORY[0] = '0' + (((cur_time / 600)) % 10);
+            // VIDEO_MEMORY[0] = *test_mem;
             VIDEO_MEMORY[1] = '0' + (( cur_time/ 60) % 10);
             VIDEO_MEMORY[3] =  '0' + ((cur_time % 60) / 10);
             VIDEO_MEMORY[4] = '0'+ (cur_time % 10);

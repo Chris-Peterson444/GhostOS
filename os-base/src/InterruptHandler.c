@@ -5,7 +5,6 @@
 
 int pressed = 1;
 extern void graphics_callback(void);
-extern void timer_callback(void);
 void external_ISR();
 void cmd_ISR(void);
 // volatile int timerIgnore = 1;
@@ -13,6 +12,13 @@ void cmd_ISR(void);
 __attribute__((always_inline)) inline void graphics_ISR(void){
     graphics_callback();
 }
+
+
+
+
+
+
+
 
 uint32_t c_syscall(uint32_t param){
  

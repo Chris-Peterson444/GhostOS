@@ -33,3 +33,5 @@
 
 # Binary directory
 bin/
+# Library directory
+lib/
