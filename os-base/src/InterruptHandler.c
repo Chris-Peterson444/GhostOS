@@ -1,27 +1,38 @@
 #include "InterruptHandler.h"
 #include "StatusRegisterUtility.h"
-#include "InterruptMask.h"
+#include "InterruptCodes.h"
+#include "SystemCallCodes.h"
+#include "Syscalls.h"
 
 
 int pressed = 1;
 extern void graphics_callback(void);
 void external_ISR();
 void cmd_ISR(void);
-// volatile int timerIgnore = 1;
-// __attribute__((always_inline)) inline void timer_ISR(void);
 __attribute__((always_inline)) inline void graphics_ISR(void){
     graphics_callback();
 }
 
 
+volatile int CartridgeInserted = 0;
+volatile void (*jump)();
 
 
+uint32_t c_syscall(uint32_t code, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5){
 
-
-
-
-uint32_t c_syscall(uint32_t param){
-    if(param == 3){
+    switch(code){
+        case CONTROLLERSTATUS:
+            return _getControllerStatus();
+        case TEXTMODESET:
+            return _graphicsMode(0);
+        case GRAPHICMODESET:
+            return _graphicsMode(1);
+        case REFRESHRATE:
+            return _setRefreshRate(a1);
+        default:
+        break;
+    }
+    if(code == 42){
         *(volatile char *)(0x50000000 + 0xFE800) = 'B';
     }
     else{
@@ -76,10 +87,10 @@ inline void external_ISR (void){
     	// Get entry point
         uint32_t jmp_point = CARTRIDGE_STATUS & (uint32_t) 0xFFFFFFFC;
         // Make a function pointer and jump
-        void (*jump)() =  jmp_point;
-        jump();
-        
-        
+        jump =  jmp_point;
+        CartridgeInserted = 1;
+        // jump();
+        CART_interrupt_clear();
 
     }
 

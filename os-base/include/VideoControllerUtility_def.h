@@ -21,14 +21,16 @@ __attribute__((always_inline)) inline void graphics_graphic_mode(void){
     GRAPHICS_MODE_CONTROL = GRAPHICS_MODE_CONTROL | (uint32_t) 0x1;
 }
 
-__attribute__((always_inline)) inline void graphics_refresh_rate(uint32_t rate){
+__attribute__((always_inline)) inline uint32_t graphics_refresh_rate(uint32_t rate){
 	if (rate > 127 || rate < 0){
 		rate = 0;
 	}
+	uint32_t old = GRAPHICS_MODE_CONTROL & 0xFFFFFF00;
+	uint32_t mode = GRAPHICS_MODE_CONTROL & 0x1;
 	rate = rate << 1;
-	// uint32_t mask = GRAPHICS_MODE_CONTROL & 0xFFFFFF01
- //    uint32_t mask = 0x64 | 0x1;
-    GRAPHICS_MODE_CONTROL = GRAPHICS_MODE_CONTROL & rate;
+	rate = rate | mode;
+    GRAPHICS_MODE_CONTROL = old | rate;
+    return rate;
 }
 
 

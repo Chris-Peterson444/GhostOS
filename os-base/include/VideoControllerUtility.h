@@ -20,6 +20,6 @@ __attribute__((always_inline)) inline void graphics_graphic_mode(void);
  Refresh rate is default set to 10 ticks per clock cycle (rate=0)
  Valid values of rate are [1, 127]
 */
-__attribute__((always_inline)) inline void graphics_refresh_rate(uint32_t rate);
+__attribute__((always_inline)) inline uint32_t graphics_refresh_rate(uint32_t rate);
 
 #endif

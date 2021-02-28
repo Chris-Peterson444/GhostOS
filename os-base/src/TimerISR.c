@@ -1,10 +1,3 @@
-/*
-* @Author: Chris Peterson
-* @Date:   2021-02-24 16:37:53
-* @Last Modified by:   Chris Peterson
-* @Last Modified time: 2021-02-24 16:45:45
-*/
-
 #include "isr/TimerISR.h"
 
 #include <stdint.h>

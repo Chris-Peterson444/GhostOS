@@ -42,6 +42,8 @@ STARTUP_OBJS = 	$(OBJ_DIR)/main.o               \
                 $(OBJ_DIR)/InterruptHandler.o   \
                 $(OBJ_DIR)/TimerISR.o           
 
+SYSCALL_OBJS =  $(OBJ_DIR)/Syscalls.o
+
 NEWLIB_OBJS =   $(OBJ_DIR)/close.o              \
 				$(OBJ_DIR)/environ.o            \
 				$(OBJ_DIR)/execve.o             \
@@ -61,7 +63,7 @@ NEWLIB_OBJS =   $(OBJ_DIR)/close.o              \
 				$(OBJ_DIR)/wait.o               \
 				$(OBJ_DIR)/write.o
 
-TARGET_OBJS =   $(STARTUP_OBJS) $(NEWLIB_OBJS)
+TARGET_OBJS =   $(STARTUP_OBJS) $(SYSCALL_OBJS) $(NEWLIB_OBJS)
 
 all: directories $(BIN_DIR)/$(TARGET_NAME)
 

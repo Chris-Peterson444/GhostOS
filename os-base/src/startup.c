@@ -33,6 +33,6 @@ void init(void){
     MTIMECMP_LOW = 100;
     MTIMECMP_HIGH = 0;
     external_interrupt_enable_all(); //Enable all external interrupts
-    graphics_refresh_rate(0x5A);
+    // graphics_refresh_rate();
     // graphics_text_mode();
 }

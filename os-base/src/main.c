@@ -1,6 +1,11 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "VideoControllerMap.h"
+#include "ChipsetRegisters.h"
+
+extern volatile int CartridgeInserted;
+extern volatile void (*jump)();
 
 volatile int global = 42;
 volatile uint32_t controller_status = 0;
@@ -8,15 +13,17 @@ volatile int time = 0;
 void timer_callback(void);
 volatile int gmodeCounter = 0;
 void graphics_callback(void);
+void old_wait_prog(void);
 
-#define GRPAHICS_MODE (*((volatile uint32_t *)0x500FF414))
-
+int x_pos = 12;
+int last_global = 42;
 volatile char *VIDEO_MEMORY = (volatile char *)(0x50000000 + 0xFE800);
+char string_1[] = "Please see above timer for timer functionality";
+char string_2[] = "Use controls to move \'x\'";
+char string_3[] = "Press CMD to star and pause timer and controls";
+
 int main() {
-    int a = 4;
-    int b = 12;
-    int last_global = 42;
-    int x_pos = 12;
+
 
     VIDEO_MEMORY[0] = '0';
     VIDEO_MEMORY[1] = '0';
@@ -24,82 +31,98 @@ int main() {
     VIDEO_MEMORY[3] = '0';
     VIDEO_MEMORY[4] = '0';
 
-    char string_1[] = "Please see above timer for timer functionality";
-    char string_2[] = "Use controls to move \'x\'";
-    char string_3[] = "Press CMD to star and pause timer and controls";
-
-    char* test_mem = (char *) malloc(sizeof('a'));
-    *test_mem = 'a';
 
     while (1) {
-        int c = a + b + global;
-        if(global != last_global){
-            int cur_time = time / 10;
-            VIDEO_MEMORY[0] = '0' + (((cur_time / 600)) % 10);
-            // VIDEO_MEMORY[0] = *test_mem;
-            VIDEO_MEMORY[1] = '0' + (( cur_time/ 60) % 10);
-            VIDEO_MEMORY[3] =  '0' + ((cur_time % 60) / 10);
-            VIDEO_MEMORY[4] = '0'+ (cur_time % 10);
+        
+        if(CartridgeInserted){
+            //Clear the screen
             for(int i = 0; i <= (sizeof(string_1)/sizeof(*string_1)); i++){
-            VIDEO_MEMORY[i + 64*2] = string_1[i];
+                VIDEO_MEMORY[i + 64*2] = ' ';
             }
-
-            for(int i = 0; i <= (sizeof(string_2)/sizeof(*string_2)); i++){
-            VIDEO_MEMORY[i + 64*4] = string_2[i];
+                for(int i = 0; i <= (sizeof(string_2)/sizeof(*string_2)); i++){
+                VIDEO_MEMORY[i + 64*4] = ' ';
             }
-
             for(int i = 0; i <= (sizeof(string_3)/sizeof(*string_3)); i++){
-            VIDEO_MEMORY[i + 64*7] = string_3[i];
+                 VIDEO_MEMORY[i + 64*7] = ' ';
             }
 
-            if(controller_status){
-                VIDEO_MEMORY[x_pos] = ' ';
-                if(controller_status & 0x1){
-                    if(x_pos & 0x3F){
-                        x_pos--;
-                    }
-                }
-                if(controller_status & 0x2){
-                    if(x_pos >= 0x40){
-                        x_pos -= 0x40;
-                    }
-                }
-                if(controller_status & 0x4){
-                    if(x_pos < 0x8C0){
-                        x_pos += 0x40;
-                    }
-                }
-                if(controller_status & 0x8){
-                    if((x_pos & 0x3F) != 0x3F){
-                        x_pos++;
-                    }
-                }
-                if(controller_status & 0x10){
-                    if(x_pos & 0x3F){
-                        x_pos--;
-                    }
-                }
-                if(controller_status & 0x20){
-                    if(x_pos >= 0x40){
-                        x_pos -= 0x40;
-                    }
-                }
-                if(controller_status & 0x40){
-                    if(x_pos < 0x8C0){
-                        x_pos += 0x40;
-                    }
-                }
-                if(controller_status & 0x80){
-                    if((x_pos & 0x3F) != 0x3F){
-                        x_pos++;
-                    }
-                }
-                VIDEO_MEMORY[x_pos] = 'X';
-            }
+            //Jump into cartridge
+            jump();
+
+        }
+
+        if(global != last_global){
+            // old_wait_prog();
             last_global = global;
         }
     }
     return 0;
+}
+
+
+inline void old_wait_prog(void){
+    int cur_time = time / 10;
+    VIDEO_MEMORY[0] = '0' + (((cur_time / 600)) % 10);
+    VIDEO_MEMORY[1] = '0' + (( cur_time/ 60) % 10);
+    VIDEO_MEMORY[3] =  '0' + ((cur_time % 60) / 10);
+    VIDEO_MEMORY[4] = '0'+ (cur_time % 10);
+
+    for(int i = 0; i <= (sizeof(string_1)/sizeof(*string_1)); i++){
+    VIDEO_MEMORY[i + 64*2] = string_1[i];
+    }
+
+    for(int i = 0; i <= (sizeof(string_2)/sizeof(*string_2)); i++){
+    VIDEO_MEMORY[i + 64*4] = string_2[i];
+    }
+
+    for(int i = 0; i <= (sizeof(string_3)/sizeof(*string_3)); i++){
+    VIDEO_MEMORY[i + 64*7] = string_3[i];
+    }
+
+    if(controller_status){
+        VIDEO_MEMORY[x_pos] = ' ';
+        if(controller_status & 0x1){
+            if(x_pos & 0x3F){
+                x_pos--;
+            }
+        }
+        if(controller_status & 0x2){
+            if(x_pos >= 0x40){
+                x_pos -= 0x40;
+            }
+        }
+        if(controller_status & 0x4){
+            if(x_pos < 0x8C0){
+                x_pos += 0x40;
+            }
+        }
+        if(controller_status & 0x8){
+            if((x_pos & 0x3F) != 0x3F){
+                x_pos++;
+            }
+        }
+        if(controller_status & 0x10){
+            if(x_pos & 0x3F){
+                x_pos--;
+            }
+        }
+        if(controller_status & 0x20){
+            if(x_pos >= 0x40){
+                x_pos -= 0x40;
+            }
+        }
+        if(controller_status & 0x40){
+            if(x_pos < 0x8C0){
+                x_pos += 0x40;
+            }
+        }
+        if(controller_status & 0x80){
+            if((x_pos & 0x3F) != 0x3F){
+                x_pos++;
+            }
+        }
+        VIDEO_MEMORY[x_pos] = 'X';
+    }
 }
 
 void timer_callback(void){
@@ -109,7 +132,7 @@ void timer_callback(void){
 
 __attribute__((always_inline)) inline void graphics_callback(void){
     gmodeCounter += 1;
-    uint32_t intermediate = GRPAHICS_MODE & (uint32_t) 0x1;
+    uint32_t intermediate = GRAPHICS_MODE_CONTROL & (uint32_t) 0x1;
     if ( intermediate == (uint32_t) 0x0){
     int cur_count = gmodeCounter % 30;
     switch(cur_count){
