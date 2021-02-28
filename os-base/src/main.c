@@ -27,23 +27,7 @@ int main() {
     char string_1[] = "Please see above timer for timer functionality";
     char string_2[] = "Use controls to move \'x\'";
     char string_3[] = "Press CMD to star and pause timer and controls";
-    
-    // VIDEO_MEMORY[0 + 64*2] = string_1; 
-    // VIDEO_MEMORY[0 + 64*2] = 'H';
-    // VIDEO_MEMORY[1 + 64*2] = 'e';
-    // VIDEO_MEMORY[2 + 64*2] = 'l';
-    // VIDEO_MEMORY[3 + 64*2] = 'l';
-    // VIDEO_MEMORY[4 + 64*2] = 'o';
-    // VIDEO_MEMORY[5 + 64*2] = ' ';
-    // VIDEO_MEMORY[6 + 64*2] = 'W';
-    // VIDEO_MEMORY[7 + 64*2] = 'o';
-    // VIDEO_MEMORY[8 + 64*2] = 'r';
-    // VIDEO_MEMORY[9 + 64*2] = 'l';
-    // VIDEO_MEMORY[10 + 64*2] = 'd';
-    // VIDEO_MEMORY[11 + 64*2] = '!';
-    // VIDEO_MEMORY[12 + 64*2] = 'X';
-    // int *test = malloc(sizeof(int));
-    printf("test");
+
     char* test_mem = (char *) malloc(sizeof('a'));
     *test_mem = 'a';
 

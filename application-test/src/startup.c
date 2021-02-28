@@ -113,7 +113,7 @@ void init(void){
         *Base++ = 0;
     }
     CART_interrupt_clear();
-    csr_write_mie(0x888);       // Enable all interrupt soruces
+    // csr_write_mie(0x888);       // Enable all interrupt soruces
     csr_enable_interrupts();    // Global interrupt enable
     // MTIMECMP_LOW = 100;
     // MTIMECMP_HIGH = 0;

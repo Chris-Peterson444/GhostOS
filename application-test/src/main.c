@@ -44,12 +44,14 @@ int main() {
 
     while (1) {
         int c = a + b + global;
+        SystemCall(3);
         if(global != last_global){
-            int cur_time = time / 10;
-            VIDEO_MEMORY[0] = '0' + (((cur_time / 600)) % 10);
-            VIDEO_MEMORY[1] = '0' + (( cur_time/ 60) % 10);
-            VIDEO_MEMORY[3] =  '0' + ((cur_time % 60) / 10);
-            VIDEO_MEMORY[4] = '0'+ (cur_time % 10);
+            SystemCall(3);
+            // int cur_time = time / 10;
+            // VIDEO_MEMORY[0] = '0' + (((cur_time / 600)) % 10);
+            // VIDEO_MEMORY[1] = '0' + (( cur_time/ 60) % 10);
+            // VIDEO_MEMORY[3] =  '0' + ((cur_time % 60) / 10);
+            // VIDEO_MEMORY[4] = '0'+ (cur_time % 10);
             for(int i = 0; i <= (sizeof(string_1)/sizeof(*string_1)); i++){
             VIDEO_MEMORY[i + 64*2] = ' ';
             }

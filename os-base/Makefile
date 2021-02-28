@@ -35,7 +35,7 @@ LDFLAGS  += -Wl,--gc-sections -Wl,-T,$(LDFILE)
 
 TARGET_NAME = ghostOS
 
-TARGET_OBJS = 	$(OBJ_DIR)/main.o               \
+STARTUP_OBJS = 	$(OBJ_DIR)/main.o               \
                 $(OBJ_DIR)/crt0.o               \
                 $(OBJ_DIR)/interrupt.o          \
                 $(OBJ_DIR)/startup.o            \
@@ -61,7 +61,7 @@ NEWLIB_OBJS =   $(OBJ_DIR)/close.o              \
 				$(OBJ_DIR)/wait.o               \
 				$(OBJ_DIR)/write.o
 
-TARGET_OBJS += $(NEWLIB_OBJS)
+TARGET_OBJS =   $(STARTUP_OBJS) $(NEWLIB_OBJS)
 
 all: directories $(BIN_DIR)/$(TARGET_NAME)
 

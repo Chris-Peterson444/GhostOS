@@ -21,7 +21,12 @@ __attribute__((always_inline)) inline void graphics_ISR(void){
 
 
 uint32_t c_syscall(uint32_t param){
- 
+    if(param == 3){
+        *(volatile char *)(0x50000000 + 0xFE800) = 'B';
+    }
+    else{
+        *(volatile char *)(0x50000000 + 0xFE800 + 1) = 'B';
+    }
     return 0;
 }
 
