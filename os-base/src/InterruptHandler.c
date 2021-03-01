@@ -15,7 +15,7 @@ __attribute__((always_inline)) inline void graphics_ISR(void){
 
 
 volatile int CartridgeInserted = 0;
-volatile void (*jump)();
+TEntryFunction EntryFunction;
 
 
 uint32_t c_syscall(uint32_t code, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5){
@@ -29,15 +29,30 @@ uint32_t c_syscall(uint32_t code, uint32_t a1, uint32_t a2, uint32_t a3, uint32_
             return _graphicsMode(1);
         case REFRESHRATE:
             return _setRefreshRate(a1);
+        case PRINTTEXT:
+            return _printText(a1, a2);
+        case SETIMAGE:
+            return _setImage(a1, a2, a3, a4, a5);
+        case MOVEIMAGE:
+            return _moveImage(a1, a2, a3, a4);
+        case SETIMAGEPALETTE:
+            return _setImagePalette( a1, a2);
+        case FILLPALETTE:
+            return _setPalette( a1, a2);
+        case FILLIMAGE:
+            return _imageFill( a1, a2, a3);
         default:
         break;
     }
-    if(code == 42){
-        *(volatile char *)(0x50000000 + 0xFE800) = 'B';
-    }
-    else{
-        *(volatile char *)(0x50000000 + 0xFE800 + 1) = 'B';
-    }
+    // if(code == 42){
+    //     *(volatile char *)(0x50000000 + 0xFE800) = 'B';
+    // }
+    // else{
+    //     *(volatile char *)(0x50000000 + 0xFE800 + 1) = 'B';
+    // }
+    // _graphicsMode(0);
+    // *(volatile char *)(0x50000000 + 0xFE800 + 1) = 'B';
+
     return 0;
 }
 
@@ -79,15 +94,15 @@ inline void external_ISR (void){
         CMD_interrupt_clear();
     }
     else if (INTERRUPT_PENDING & VID_MASK){
-        graphics_ISR();
+        // graphics_ISR();
         VID_interrupt_clear();
     }
     else if (INTERRUPT_PENDING & CART_MASK){
 
     	// Get entry point
-        uint32_t jmp_point = CARTRIDGE_STATUS & (uint32_t) 0xFFFFFFFC;
+        // uint32_t jmp_point = CARTRIDGE_STATUS & (uint32_t) 0xFFFFFFFC;
         // Make a function pointer and jump
-        jump =  jmp_point;
+        EntryFunction = (TEntryFunction)(CARTRIDGE_STATUS & (uint32_t) 0xFFFFFFFC);
         CartridgeInserted = 1;
         // jump();
         CART_interrupt_clear();

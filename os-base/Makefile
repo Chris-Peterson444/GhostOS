@@ -44,6 +44,8 @@ STARTUP_OBJS = 	$(OBJ_DIR)/main.o               \
 
 SYSCALL_OBJS =  $(OBJ_DIR)/Syscalls.o
 
+HARDWARE_OBJS = $(OBJ_DIR)/VideoControllerUtility.o
+
 NEWLIB_OBJS =   $(OBJ_DIR)/close.o              \
 				$(OBJ_DIR)/environ.o            \
 				$(OBJ_DIR)/execve.o             \
@@ -63,7 +65,7 @@ NEWLIB_OBJS =   $(OBJ_DIR)/close.o              \
 				$(OBJ_DIR)/wait.o               \
 				$(OBJ_DIR)/write.o
 
-TARGET_OBJS =   $(STARTUP_OBJS) $(SYSCALL_OBJS) $(NEWLIB_OBJS)
+TARGET_OBJS =   $(STARTUP_OBJS) $(SYSCALL_OBJS) $(HARDWARE_OBJS) $(NEWLIB_OBJS)
 
 all: directories $(BIN_DIR)/$(TARGET_NAME)
 

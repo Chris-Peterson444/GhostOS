@@ -22,4 +22,35 @@ __attribute__((always_inline)) inline void graphics_graphic_mode(void);
 */
 __attribute__((always_inline)) inline uint32_t graphics_refresh_rate(uint32_t rate);
 
+/* Prints text to screen if in text mode. 
+   Returns 1 if success
+   Returns -1 if failure
+*/
+uint32_t _fillText(char *buff, uint32_t size);
+
+/* Sets specified layers background
+   Returns 1 if success
+   Returns -1 if failure
+*/
+uint32_t _fillImage(uint32_t background, uint8_t* buff, uint32_t size);
+
+/* Sets the palette information for the specified palette
+ 
+*/
+uint32_t _fillPalette(uint32_t background, uint32_t* buff);
+
+/* Sets image and palette
+
+*/
+uint32_t _imageSet(uint32_t image, uint32_t x, uint32_t y, uint32_t z, uint32_t palette);
+
+/* Sets image with old palette
+
+*/
+uint32_t _imageMove(uint32_t image, uint32_t x, uint32_t y, uint32_t z);
+
+uint32_t _imagePaletteSet(uint32_t image, uint32_t palette);
+
+
+
 #endif

@@ -36,6 +36,26 @@
 #define BACKGROUND_CTRL_3              (*((volatile uint32_t *)0x500FF10C))
 #define BACKGROUND_CTRL_4              (*((volatile uint32_t *)0x500FF110))
 
+
+/*  
+*  *******************
+*  *      TEXT       *
+*  *******************
+*/
+
+
+#define SCREEN_BUFF_SIZE              2304   // 64 x 36
+
+
+/*  
+*  *******************
+*  *      IMAGE      *
+*  *******************
+*/
+
+#define IMAGE_BUFF_SIZE              147456  // 512 x 288
+
+
 /*  
 *  *******************
 *  *     SPRITES     *
@@ -72,6 +92,8 @@
 *  *     PALETTE     *
 *  *******************
 */
+
+#define PALETTE_SIZE                   256
 
 #define BACKGROUND_PALETTE_0           (*((volatile uint32_t *)0x500FC000))
 #define BACKGROUND_PALETTE_1           (*((volatile uint32_t *)0x500FC400))
