@@ -4,11 +4,11 @@
 
 volatile int global = 42;
 volatile uint32_t controller_status = 0; 
-volatile uint32_t status = 0;
-volatile int time = 0;
-void timer_callback(void);
-volatile int gmodeCounter = 0;
-void graphics_callback(void);
+volatile uint32_t status = 5;
+// volatile int time = 0;
+// void timer_callback(void);
+// volatile int gmodeCounter = 0;
+// void graphics_callback(void);
 
 // uint32_t SystemCall(uint32_t param);
 // uint32_t SystemCall(uint32_t param1, uint32_t param2, uint32_t param3, uint32_t param4, uint32_t param5, uint32_t param6);
@@ -100,10 +100,12 @@ int main() {
         palette_2[i] = 0x000000FF;
     }
 
-    // Syscalls to set palette
+    // // Syscalls to set palette
     setPalette(0,palette_1);
     setPalette(1,palette_2);
-    setPalette(2,palette_3);
+    setPalette(2,palette_2);
+    setPalette(3,palette_1);
+    // setPalette(2,palette_3);
 
 
     // Image 1 - 3 index first color of palette
@@ -127,7 +129,7 @@ int main() {
     }
 
 
-    graphicsMode(1);
+    // graphicsMode(1);
     //             //Syscall to move last image to bottom
     // setImage(0, FULL_X, FULL_Y, BOTTOM, 0);
 
@@ -162,22 +164,93 @@ int main() {
 
         // while(1){
         //     status = getControllerStatus();
-        //     char digit = status;
-        //     printText(&digit,1);
+        //     char digit[8];
+        //     for(int i = 0; i < 8; i++){
+        //         digit[i] = (status & 0xFF) + '0';
+        //     }
+        //     digit[0] = (status & 0b10000000) + '0';
+        //     digit[1] = (status & 0b01000000) + '0';
+        //     digit[2] = (status & 0b00100000) + '0';
+        //     digit[3] = (status & 0b00010000) + '0';
+        //     digit[4] = (status & 0b00001000) + '0';
+        //     digit[5] = (status & 0b00000100) + '0';
+        //     digit[6] = (status & 0b00000010) + '0';
+        //     digit[7] = (status & 0b00000001) + '0';
+            
+        //     printText(digit,8);
         // }
                  // Syscall to set graphics mode 
     
 
 
-        // if(status != 0){
-        //     controller_status = status;
-        // }
+        if(status != 0){
+            controller_status = status;
+        }
+
+        if(controller_status == 0){
+            //do nothing
+        }
+        else if(controller_status & 0x01){
+            //Syscall to set graphics mode 
+                graphicsMode(1);
+                //Syscall to move last image to bottom
+                // setImage(last_img, FULL_X, FULL_Y, BOTTOM, 0);
+
+                //Set current image
+                // last_img = 0;
+                //Syscall to set the image
+                imageFill(0, image_1, IMAGE_BUFF_SIZE);
+                //Syscall to move the image into place
+                setImage(0, FULL_X, FULL_Y, TOP, 0);
+        }
+        else if( controller_status & 0x02){
+                //Syscall to set graphics mode 
+                // graphicsMode(1);
+                //Syscall to move last image to bottom
+                // setImage(last_img, FULL_X, FULL_Y, BOTTOM, 0);
+
+                //Set current image
+                // last_img = 1;
+                //Syscall to set the image
+                imageFill(0, image_2, IMAGE_BUFF_SIZE);
+                //Syscall to move the image into place
+                setImage(0, FULL_X, FULL_Y, TOP, 1);  
+        }
+        else if (controller_status & 0x04){
+                // Syscall to set graphics mode 
+                graphicsMode(1);
+                //Syscall to move last image to bottom
+                // setImage(last_img, FULL_X, FULL_Y, BOTTOM, 0);
+
+                //Set current image
+                // last_img = 2;
+                //Syscall to set the image
+                imageFill(0, image_3, IMAGE_BUFF_SIZE);
+                //Syscall to move the image into place
+                setImage(0, FULL_X, FULL_Y, TOP, 0);
+        }
+        else if (controller_status & 0x08){
+
+        }
+        else if(controller_status & 0x10){
+
+        }
+        else if (controller_status & 0x20){
+
+        }
+        else if (controller_status & 0x40){
+
+        }
+        else if (controller_status & 0x80){
+
+        }
+
         // switch(controller_status){
-        //      0:
+        //     case 0:
         //         graphicsMode(0);
         //         break;
         //     // red
-        //     case 128:
+        //     case 0x01:
         //         //Syscall to set graphics mode 
         //         graphicsMode(1);
         //         //Syscall to move last image to bottom
@@ -190,7 +263,7 @@ int main() {
         //         //Syscall to move the image into place
         //         setImage(0, FULL_X, FULL_Y, TOP, 0);
         //         break;
-        //     case 64:
+        //     case 0x02:
         //         //Syscall to set graphics mode 
         //         graphicsMode(1);
         //         //Syscall to move last image to bottom
@@ -199,48 +272,61 @@ int main() {
         //         //Set current image
         //         last_img = 1;
         //         //Syscall to set the image
-        //         imageFill(1, image_2, IMAGE_BUFF_SIZE);
+        //         imageFill(0, image_2, IMAGE_BUFF_SIZE);
         //         //Syscall to move the image into place
-        //         setImage(1, FULL_X, FULL_Y, TOP, 0);
+        //         setImage(0, FULL_X, FULL_Y, TOP, 1);
         //         break;
-        //     case 32:
-        //         //Syscall to set graphics mode 
-        //         graphicsMode(1);
-        //         //Syscall to move last image to bottom
-        //         setImage(last_img, FULL_X, FULL_Y, BOTTOM, 0);
+        //     // case 0x04:
+        //     //     //Syscall to set graphics mode 
+        //     //     graphicsMode(1);
+        //     //     //Syscall to move last image to bottom
+        //     //     setImage(last_img, FULL_X, FULL_Y, BOTTOM, 0);
 
-        //         //Set current image
-        //         last_img = 2;
-        //         //Syscall to set the image
-        //         imageFill(2, image_3, IMAGE_BUFF_SIZE);
-        //         //Syscall to move the image into place
-        //         setImage(2, FULL_X, FULL_Y, TOP, 0);
-        //         break;
-        //     case 16:
-        //         //Syscall to set graphics mode 
-        //         graphicsMode(1);
-        //         //Syscall to move last image to bottom
-        //         setImage(last_img, FULL_X, FULL_Y, BOTTOM, 0);
+        //     //     //Set current image
+        //     //     last_img = 2;
+        //     //     //Syscall to set the image
+        //     //     imageFill(2, image_3, IMAGE_BUFF_SIZE);
+        //     //     //Syscall to move the image into place
+        //     //     setImage(2, FULL_X, FULL_Y, TOP, 0);
+        //     //     break;
+        //     // case 0x08:
+        //     //     //Syscall to set graphics mode 
+        //     //     graphicsMode(1);
+        //     //     //Syscall to move last image to bottom
+        //     //     setImage(last_img, FULL_X, FULL_Y, BOTTOM, 0);
 
-        //         //Set current image
-        //         last_img = 3;
-        //         //Syscall to set the image
-        //         imageFill(3, image_4, IMAGE_BUFF_SIZE);
-        //         //Syscall to move the image into place
-        //         setImage(3, FULL_X, FULL_Y, TOP, 0);
-        //         break;
+        //     //     //Set current image
+        //     //     last_img = 3;
+        //     //     //Syscall to set the image
+        //     //     imageFill(3, image_4, IMAGE_BUFF_SIZE);
+        //     //     //Syscall to move the image into place
+        //     //     setImage(3, FULL_X, FULL_Y, TOP, 0);
+        //     //     break;
+        //     //     case 0x10:
+        //     //     //Syscall to set graphics mode 
+        //     //     graphicsMode(1);
+        //     //     //Syscall to move last image to bottom
+        //     //     setImage(last_img, FULL_X, FULL_Y, BOTTOM, 0);
+
+        //     //     //Set current image
+        //     //     last_img = 3;
+        //     //     //Syscall to set the image
+        //     //     imageFill(3, image_4, IMAGE_BUFF_SIZE);
+        //     //     //Syscall to move the image into place
+        //     //     setImage(3, FULL_X, FULL_Y, TOP, 0);
+        //     //     break;
         //     default:
         //         //Syscall to set graphics mode 
-        //         graphicsMode(1);
-        //         //Syscall to move last image to bottom
-        //         setImage(last_img, FULL_X, FULL_Y, BOTTOM, 0);
+        //         // graphicsMode(1);
+        //         // //Syscall to move last image to bottom
+        //         // setImage(last_img, FULL_X, FULL_Y, BOTTOM, 0);
 
-        //         //Set current image
-        //         last_img = 3;
-        //         //Syscall to set the image
-        //         imageFill(3, image_4, IMAGE_BUFF_SIZE);
-        //         //Syscall to move the image into place
-        //         setImage(3, FULL_X, FULL_Y, TOP, 0);
+        //         // //Set current image
+        //         // last_img = 3;
+        //         // //Syscall to set the image
+        //         // imageFill(3, image_4, IMAGE_BUFF_SIZE);
+        //         // //Syscall to move the image into place
+        //         // setImage(3, FULL_X, FULL_Y, TOP, 0);
         //         break;
 
         // }
@@ -249,10 +335,10 @@ int main() {
     return 0;
 }
 
-void timer_callback(void){
-    time += 1;
-    // VIDEO_MEMORY[1] = 'B';
-}
+// void timer_callback(void){
+//     time += 1;
+//     // VIDEO_MEMORY[1] = 'B';
+// }
 
 // __attribute__((always_inline)) inline void graphics_callback(void){
 //     gmodeCounter += 1;

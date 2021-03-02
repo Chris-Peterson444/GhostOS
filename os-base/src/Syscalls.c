@@ -31,7 +31,7 @@ uint32_t _renderSprite(){
 */
 
 uint32_t _graphicsMode(uint32_t mode){
-	if(mode){
+	if(mode==1){
 		graphics_graphic_mode();
 	}
 	else{

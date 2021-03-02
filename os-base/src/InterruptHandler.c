@@ -19,29 +19,37 @@ TEntryFunction EntryFunction;
 
 
 uint32_t c_syscall(uint32_t code, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5){
-
+    uint32_t a0;
     switch(code){
         case CONTROLLERSTATUS:
-            return _getControllerStatus();
-        case TEXTMODESET:
-            return _graphicsMode(0);
+            a0 = _getControllerStatus();
+            break;
         case GRAPHICMODESET:
-            return _graphicsMode(1);
+            a0 = _graphicsMode(a1);
+            break;
         case REFRESHRATE:
-            return _setRefreshRate(a1);
+            a0 = _setRefreshRate(a1);
+            break;
         case PRINTTEXT:
-            return _printText(a1, a2);
+            a0 = _printText((char *) a1, a2);
+            break;
         case SETIMAGE:
-            return _setImage(a1, a2, a3, a4, a5);
+            a0 = _setImage(a1, a2, a3, a4, a5);
+            break;
         case MOVEIMAGE:
-            return _moveImage(a1, a2, a3, a4);
+            a0 = _moveImage(a1, a2, a3, a4);
+            break;
         case SETIMAGEPALETTE:
-            return _setImagePalette( a1, a2);
+            a0 = _setImagePalette( a1, a2);
+            break;
         case FILLPALETTE:
-            return _setPalette( a1, a2);
+            a0 = _setPalette( a1, (uint32_t *) a2);
+            break;
         case FILLIMAGE:
-            return _imageFill( a1, a2, a3);
+            a0 = _imageFill( a1, (uint8_t *) a2, a3);
+            break;
         default:
+            a0 = 0;
         break;
     }
     // if(code == 42){
@@ -53,7 +61,7 @@ uint32_t c_syscall(uint32_t code, uint32_t a1, uint32_t a2, uint32_t a3, uint32_
     // _graphicsMode(0);
     // *(volatile char *)(0x50000000 + 0xFE800 + 1) = 'B';
 
-    return 0;
+    return a0;
 }
 
 void c_interrupt_handler(void){
