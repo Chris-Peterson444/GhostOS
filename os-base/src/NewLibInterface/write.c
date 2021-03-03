@@ -22,7 +22,47 @@ int _write(int file, char *ptr, int len) {
 
 */
 
-// Do nothing
+#include "VideoControllerMap.h"
+#include <stdint.h>
+
+void outbyte(char ch);
+
+
+// Newlib write stub
 int _write(int file, char *ptr, int len) {
-  return -1;
+  int todo;
+
+  for (todo = 0; todo < len; todo++) {
+    outbyte (*ptr++);
+  }
+  return len;
+}
+
+//Print text to screen like a terminal
+void outbyte(char ch){
+	uint8_t * textData = (uint8_t *) &TEXT_DATA;
+	static uint8_t XPos = 0, YPos = 0;
+	const uint8_t CharsPerRow = 64, RowsPerScreen = 36;
+
+	switch(ch){
+
+		case '\n':
+			XPos = 0;
+			YPos = (YPos + 1) % RowsPerScreen;
+			break;
+		case '\r':
+			XPos = 0;
+			break;
+		case '\b':
+			XPos--;
+			break;
+		default:
+			textData[XPos + YPos*RowsPerScreen] = ch;
+			XPos++;
+			if( CharsPerRow <= XPos){
+				XPos = 0;
+				YPos = (YPos + 1) % RowsPerScreen;
+			}
+			break;
+	}
 }
