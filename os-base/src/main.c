@@ -52,9 +52,10 @@ int main() {
     // }
     // _fillImage(0,data,IMAGE_BUFF_SIZE);
     // _imageSet(0,512,288,4,0);
-     for(int i = 0; i < (sizeof(string_4)/sizeof(*string_4)); i++){
-                VIDEO_MEMORY[i + 64*0] = string_4[i];
-     }
+    printf("%s\n", "Please insert cartridge");
+     // for(int i = 0; i < (sizeof(string_4)/sizeof(*string_4)); i++){
+     //            VIDEO_MEMORY[i + 64*0] = string_4[i];
+     // }
 
 
     // *SPRITE = 0b1101001010000100000000100000001;
