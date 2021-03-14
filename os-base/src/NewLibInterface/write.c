@@ -40,29 +40,35 @@ int _write(int file, char *ptr, int len) {
 
 //Print text to screen like a terminal
 void outbyte(char ch){
-	uint8_t * textData = (uint8_t *) &TEXT_DATA;
+	volatile uint8_t * textData = (volatile uint8_t *) &TEXT_DATA;
 	static uint8_t XPos = 0, YPos = 0;
 	const uint8_t CharsPerRow = 64, RowsPerScreen = 36;
 
 	switch(ch){
+		case '\n':	XPos = 0;
+					YPos = (YPos + 1) % RowsPerScreen;
+					break;
 
-		case '\n':
-			XPos = 0;
-			YPos = (YPos + 1) % RowsPerScreen;
-			break;
-		case '\r':
-			XPos = 0;
-			break;
-		case '\b':
-			XPos--;
-			break;
-		default:
-			textData[XPos + YPos*RowsPerScreen] = ch;
-			XPos++;
-			if( CharsPerRow <= XPos){
-				XPos = 0;
-				YPos = (YPos + 1) % RowsPerScreen;
-			}
-			break;
+		case '\r':	XPos = 0;
+					break;
+
+		case '\b':	if(XPos){
+						XPos--;
+					}
+					else{
+						XPos--;
+						if(YPos != 0){
+							YPos--;
+						}
+					}
+					break;
+
+		default:	textData[YPos*CharsPerRow + XPos] = ch;
+					XPos++;
+					if( CharsPerRow <= XPos){
+						XPos = 0;
+						YPos = (YPos + 1) % RowsPerScreen;
+					}
+					break;
 	}
 }
