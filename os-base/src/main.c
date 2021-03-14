@@ -6,6 +6,7 @@
 #include "ChipsetRegisters.h"
 #include "VideoControllerUtility.h"
 #include "InterruptHandler.h"
+#include "Threads.h"
 
 extern volatile int CartridgeInserted;
 extern TEntryFunction EntryFunction;
