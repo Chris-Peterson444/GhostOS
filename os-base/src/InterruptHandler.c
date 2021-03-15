@@ -21,35 +21,38 @@ TEntryFunction EntryFunction;
 uint32_t c_syscall(uint32_t code, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5){
     uint32_t a0;
     switch(code){
-        case CONTROLLERSTATUS:
-            a0 = _getControllerStatus();
-            break;
-        case GRAPHICMODESET:
-            a0 = _graphicsMode(a1);
-            break;
-        case REFRESHRATE:
-            a0 = _setRefreshRate(a1);
-            break;
-        case PRINTTEXT:
-            a0 = _printText((char *) a1, a2);
-            break;
-        case SETIMAGE:
-            a0 = _setImage(a1, a2, a3, a4, a5);
-            break;
-        case MOVEIMAGE:
-            a0 = _moveImage(a1, a2, a3, a4);
-            break;
-        case SETIMAGEPALETTE:
-            a0 = _setImagePalette( a1, a2);
-            break;
-        case FILLPALETTE:
-            a0 = _setPalette( a1, (uint32_t *) a2);
-            break;
-        case FILLIMAGE:
-            a0 = _imageFill( a1, (uint8_t *) a2, a3);
-            break;
+        case CONTROLLERSTATUS:  a0 = _getControllerStatus();
+                                break;
+
+        case GRAPHICMODESET:    a0 = _graphicsMode(a1);
+                                break;
+
+        case REFRESHRATE:       a0 = _setRefreshRate(a1);
+                                break;
+
+        case PRINTTEXT:         a0 = _printText((char *) a1, a2);
+                                break;
+
+        case SETIMAGE:          a0 = _setImage(a1, a2, a3, a4, a5);
+                                break;
+
+        case MOVEIMAGE:         a0 = _moveImage(a1, a2, a3, a4);
+                                break;
+
+        case SETIMAGEPALETTE:   a0 = _setImagePalette( a1, a2);
+                                break;
+
+        case FILLPALETTE:       a0 = _setPalette( a1, (uint32_t *) a2);
+                                break;
+
+        case FILLIMAGE:         a0 = _imageFill( a1, (uint8_t *) a2, a3);
+                                break;
+
+        case CLEARTEXT:         a0 = _clearTextScreen();
+                                break;
+
         default:
-            a0 = 0;
+                                a0 = 0;
         break;
     }
     // if(code == 42){

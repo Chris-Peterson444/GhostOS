@@ -189,3 +189,8 @@ uint32_t _imagePaletteSet(uint32_t image, uint32_t palette){
 	*img_ptr = old_val | palette;
 	return 1; 
 }
+
+uint32_t _clearText(){
+	char zero[SCREEN_BUFF_SIZE] = {' '};
+	return _fillText(zero, SCREEN_BUFF_SIZE);
+}

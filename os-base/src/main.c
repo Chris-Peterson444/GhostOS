@@ -6,6 +6,7 @@
 #include "ChipsetRegisters.h"
 #include "VideoControllerUtility.h"
 #include "InterruptHandler.h"
+#include "StatusRegisterUtility.h"
 #include "Threads.h"
 
 extern volatile int CartridgeInserted;
@@ -26,69 +27,73 @@ volatile char *SPRITE = (volatile char *)(0x500FF114);
 volatile uint32_t *PALETTE = (volatile uint32_t *)(0x500FC000);
 volatile uint32_t *BACK_CTRL = (volatile uint32_t *)(0x500FF100);
 
-char string_1[] = "Please see above timer for timer functionality";
-char string_2[] = "Use controls to move \'x\'";
-char string_3[] = "Press CMD to start and pause timer and controls";
-char string_4[] = "Please insert cartridge";
+
+
+
+extern volatile uint32_t TimerTicks;
+
+uint32_t Thread1(void *ptr){
+    TCPUStackRef *ThreadPointers = (TCPUStackRef *)ptr;
+    uint32_t LastTicks = TimerTicks;
+    csr_enable_interrupts();
+    while(1){
+        if(LastTicks != TimerTicks){
+            printf("T: %d\r",TimerTicks);
+            fflush(stdout);
+            if((LastTicks / 100) != (TimerTicks / 100)){
+                TCPUInterruptState PreviousState = CPUHALSuspendInterrupts();
+                CPUHALContextSwitch(&ThreadPointers[1],ThreadPointers[0]);
+                CPUHALResumeInterrupts(PreviousState);
+            }
+            LastTicks = TimerTicks;
+        }
+    }
+} 
+
+
 
 int main() {
 
-    // _fillText(string_3, strlen(string_3));
-    // VIDEO_MEMORY[0] = '0';
-    // VIDEO_MEMORY[1] = '0';
-    // VIDEO_MEMORY[2] = ':';
-    // VIDEO_MEMORY[3] = '0';
-    // VIDEO_MEMORY[4] = '0';
+    // printf("%s\n", "Please insert cartridge");
 
 
-    // graphics_graphic_mode();
-    // for(int i = 0; i < 255; i++){
-    //     PALETTE[i] = 0xFF0000FF;
-    // }
-    // PALETTE[128] = 0x00FF00FF;
-    // // *BACK_CTRL = *BACK_CTRL | 0b11111111110100100000010010000000;
-    // uint8_t data[IMAGE_BUFF_SIZE] = {0};
-    // for(int i = 0; i < IMAGE_BUFF_SIZE; i++){
-    //     data[i] = 128;
-    // }
-    // _fillImage(0,data,IMAGE_BUFF_SIZE);
-    // _imageSet(0,512,288,4,0);
-    printf("%s\n", "Please insert cartridge");
-     // for(int i = 0; i < (sizeof(string_4)/sizeof(*string_4)); i++){
-     //            VIDEO_MEMORY[i + 64*0] = string_4[i];
-     // }
+    uint32_t LastTicks = 0;
+    uint32_t Thread1Stack[2048];
+    TCPUStackRef ThreadPointers[2];
+    ThreadPointers[1] = CPUHALContextInitialize((TCPUStackRef)(Thread1Stack+2048),Thread1,ThreadPointers);
+    printf("Hello World\n");
 
+    for(int i = 0; i < 14; i++){
+        printf("%2d: %08X @%p\n",13 - i, ThreadPointers[1][13-i],&ThreadPointers[1][13-i]);
+    }
 
-    // *SPRITE = 0b1101001010000100000000100000001;
 
 
     while (1) {
-         // _imageSet(0,512,288,4,0);
-        if(CartridgeInserted){
-            //Clear the screen
-             for(int i = 0; i < (sizeof(string_4)/sizeof(*string_4)); i++){
-                VIDEO_MEMORY[i + 64*0] = ' ';
-             }
-            // for(int i = 0; i <= (sizeof(string_1)/sizeof(*string_1)); i++){
-            //     VIDEO_MEMORY[i + 64*2] = ' ';
-            // }
-            //     for(int i = 0; i <= (sizeof(string_2)/sizeof(*string_2)); i++){
-            //     VIDEO_MEMORY[i + 64*4] = ' ';
-            // }
-            // for(int i = 0; i <= (sizeof(string_3)/sizeof(*string_3)); i++){
-            //      VIDEO_MEMORY[i + 64*7] = ' ';
-            // }
+        // if(CartridgeInserted){
+        //     _clearText();
+        //     EntryFunction();
+        // }
 
-            //Jump into cartridge
-            // graphics_text_mode();
-            EntryFunction();
+        // if(global != last_global){
+        //     // old_wait_prog();
+        //     last_global = global;
+        // }
 
+            if(LastTicks != TimerTicks){
+            printf("M: %d\r",TimerTicks);
+            fflush(stdout);
+            
+            if((LastTicks / 100) != (TimerTicks / 100)){
+                TCPUInterruptState PreviousState = CPUHALSuspendInterrupts();
+                CPUHALContextSwitch(&ThreadPointers[0],ThreadPointers[1]);
+                CPUHALResumeInterrupts(PreviousState);
+            }
+            LastTicks = TimerTicks;
         }
 
-        if(global != last_global){
-            // old_wait_prog();
-            last_global = global;
-        }
+
+
     }
     return 0;
 }
@@ -100,18 +105,6 @@ inline void old_wait_prog(void){
     VIDEO_MEMORY[1] = '0' + (( cur_time/ 60) % 10);
     VIDEO_MEMORY[3] =  '0' + ((cur_time % 60) / 10);
     VIDEO_MEMORY[4] = '0'+ (cur_time % 10);
-
-    for(int i = 0; i <= (sizeof(string_1)/sizeof(*string_1)); i++){
-    VIDEO_MEMORY[i + 64*2] = string_1[i];
-    }
-
-    for(int i = 0; i <= (sizeof(string_2)/sizeof(*string_2)); i++){
-    VIDEO_MEMORY[i + 64*4] = string_2[i];
-    }
-
-    for(int i = 0; i <= (sizeof(string_3)/sizeof(*string_3)); i++){
-    VIDEO_MEMORY[i + 64*7] = string_3[i];
-    }
 
     if(controller_status){
         VIDEO_MEMORY[x_pos] = ' ';

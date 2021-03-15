@@ -12,6 +12,7 @@
 #define MOVEIMAGE                  9
 #define FILLPALETTE                10
 #define FILLIMAGE                  11
+#define CLEARTEXT                  12
 
 
 #endif

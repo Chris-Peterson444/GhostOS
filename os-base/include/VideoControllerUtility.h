@@ -51,6 +51,8 @@ uint32_t _imageMove(uint32_t image, uint32_t x, uint32_t y, uint32_t z);
 
 uint32_t _imagePaletteSet(uint32_t image, uint32_t palette);
 
+uint32_t _clearText();
+
 
 
 #endif

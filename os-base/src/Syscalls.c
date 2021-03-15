@@ -73,4 +73,6 @@ uint32_t _imageFill(uint32_t background, uint8_t* buff, uint32_t size){
 	return _fillImage( background, buff, size);
 }
 
-
+uint32_t _clearTextScreen(){
+	return _clearText();
+}

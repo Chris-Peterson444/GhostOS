@@ -4,6 +4,7 @@
 #define STATUSREGISTERUTILITY_H
 #include <stdint.h>
 #include "StatusRegisterUtility_def.h"
+#include "Threads.h"
 
 
 //Get mstatus reg
@@ -20,6 +21,12 @@ __attribute__((always_inline)) inline void csr_enable_interrupts(void);
 
 //Disable Global Interrupts
 __attribute__((always_inline)) inline void csr_disable_interrupts(void);
+
+//Disable Global Interrupts
+__attribute__((always_inline)) inline TCPUInterruptState CPUHALSuspendInterrupts(void);
+
+//Resume Global Interrupts
+__attribute__((always_inline)) inline void CPUHALResumeInterrupts(TCPUInterruptState state);
 
 //Get Interrupt Cause
 __attribute__((always_inline)) inline uint32_t csr_mcause_read(void);

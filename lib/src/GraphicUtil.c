@@ -42,3 +42,7 @@ uint32_t setRefreshRate(uint32_t rate){
 uint32_t imageFill(uint32_t background, uint8_t* buff, uint32_t size){
 	return SystemCall(FILLIMAGE, background, (uint32_t) buff, size, -1, -1);
 }
+
+uint32_t clearTextScreen(){
+	return SystemCall(CLEARTEXT, -1, -1, -1, -1, -1);
+}

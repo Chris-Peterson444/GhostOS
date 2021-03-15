@@ -1,6 +1,7 @@
 #ifndef STATUSREGISTERUTILITY_DEF_H
 #define STATUSREGISTERUTILITY_DEF_H
 #include "ChipsetRegisters.h"
+#include "Threads.h"
 
 __attribute__((always_inline)) inline uint32_t csr_mstatus_read(void){
     uint32_t result;
@@ -22,6 +23,17 @@ __attribute__((always_inline)) inline void csr_enable_interrupts(void){
 
 __attribute__((always_inline)) inline void csr_disable_interrupts(void){
     asm volatile ("csrci mstatus, 0x8");
+}
+
+
+__attribute__((always_inline)) inline TCPUInterruptState CPUHALSuspendInterrupts(void){
+    uint32_t result;
+    asm volatile ("csrrci %0, mstatus, 0x8" : "=r"(result));
+    return result;
+}
+
+__attribute__((always_inline)) inline void CPUHALResumeInterrupts(TCPUInterruptState state){
+    asm volatile ("csrs mstatus, %0" : : "r"(state & 0x8));
 }
 
 __attribute__((always_inline)) inline uint32_t csr_mcause_read(void){

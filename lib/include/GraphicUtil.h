@@ -20,6 +20,7 @@ uint32_t graphicsMode(uint32_t mode);
 uint32_t printText(char * buff, uint32_t size);
 uint32_t setRefreshRate(uint32_t rate);
 uint32_t imageFill(uint32_t background, uint8_t* buff, uint32_t size);
+uint32_t clearTextScreen();
 
 
 

@@ -14,6 +14,7 @@ uint32_t _renderSprite();
 uint32_t _graphicsMode(uint32_t mode);
 uint32_t _printText(char * buff, uint32_t size);
 uint32_t _setRefreshRate(uint32_t rate);
+uint32_t _clearTextScreen();
 
 
 #endif
