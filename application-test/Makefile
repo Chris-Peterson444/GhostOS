@@ -13,19 +13,21 @@ INC_DIR = ./include
 SRC_DIR = ./src
 OBJ_DIR = ./obj
 BIN_DIR = ./bin
-GHOST_LIB_DIR = ./../lib/bin
-GHOST_LIB_INC_DIR = ./../lib/include/
-LIB_OBJS_DIR = ./../lib/obj/
+LIB_DIR = ./../lib
+GHOST_LIB_DIR = $(LIB_DIR)/bin
+GHOST_LIB_INC_DIR = $(LIB_DIR)/include/
+LIB_OBJS_DIR = $(LIB_DIR)/obj
 
-DEBUG_MODE=TRUE
+# LIB_OBJS =
+
+DEBUG_MODE=True
 
 ifdef DEBUG_MODE
 DEFINES  += -DDEBUG
 CFLAGS   += -O0 -g -ggdb
 #LDFLAGS  += -Wl,-no_pie
 LIBFLAGS +=
-LIB_OBJS =    $(LIB_OBJS_DIR)/GraphicUtil.o       \
-			  $(LIB_OBJS_DIR)/SystemUtil.o
+LIB_OBJS = $(addprefix $(LIB_OBJS_DIR)/, $(shell ls $(LIB_OBJS_DIR)/))
 else 
 CFLAGS   += -O3
 LIBFLAGS = -L$(GHOST_LIB_DIR) -lghostutil
@@ -40,16 +42,19 @@ LDFLAGS  += -Wl,--gc-sections -Wl,-T,$(LDFILE)
 
 TARGET_NAME = application-test
 
+LIB_TARGETS = library
+
 TARGET_OBJS =   $(OBJ_DIR)/main.o               \
                 $(OBJ_DIR)/crt0.o               \
                 $(OBJ_DIR)/interrupt.o          \
-                $(OBJ_DIR)/startup.o             \
-            
+                $(OBJ_DIR)/startup.o             
 
-all: directories $(BIN_DIR)/$(TARGET_NAME)
+ALL_OBJS = $(LIB_OBJS) $(TARGET_OBJS)            
 
-$(BIN_DIR)/$(TARGET_NAME): $(LIB_OBJS) $(TARGET_OBJS)
-	$(CC) $(TARGET_OBJS) $(LIB_OBJS) $(LIBFLAGS) -o $(BIN_DIR)/$(TARGET_NAME) $(CFLAGS) $(DEFINES) $(LDFLAGS) 
+all: directories $(LIB_TARGETS) $(BIN_DIR)/$(TARGET_NAME)
+
+$(BIN_DIR)/$(TARGET_NAME): $(ALL_OBJS)
+	$(CC) $(ALL_OBJS) $(LIBFLAGS) -o $(BIN_DIR)/$(TARGET_NAME) $(CFLAGS) $(DEFINES) $(LDFLAGS) 
 	$(STRIP) $(BIN_DIR)/$(TARGET_NAME) -o $(BIN_DIR)/$(TARGET_NAME).strip
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.s
@@ -57,6 +62,12 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.s
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) $(DEFINES) $(INCLUDE) -c $< -o $@
+
+# $$(LIB_OBJS): library
+
+# Compiling library files for debug mode
+library:
+	@cd $(LIB_DIR) && $(MAKE)
 	
 directories: $(OBJ_DIR) $(BIN_DIR)
 

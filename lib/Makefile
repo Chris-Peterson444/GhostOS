@@ -10,11 +10,12 @@ OBJDUMP=$(TOOLPREFIX)objdump
 STRIP=$(TOOLPREFIX)strip
 
 INC_DIR = ./include
-INC_DIR_2 = ./../os-base/include
 SRC_DIR = ./src
 OBJ_DIR = ./obj
 BIN_DIR = ./bin
 # LIB_DIR = ./lib/build_newlib
+OS_INC_DIR = ./../os-base/include
+NLIB_SRC_DIR = ./../os-base/src/NewLibInterface
 
 DEBUG_MODE=TRUE
 
@@ -27,7 +28,7 @@ CFLAGS   += -O3
 endif
 
 LDFILE   = riscv32-console.ld
-INCLUDE  += -I $(INC_DIR) -I $(INC_DIR_2)
+INCLUDE  += -I $(INC_DIR) -I $(OS_INC_DIR)
 ARFLAGS  = -cvq
 
 
@@ -36,11 +37,31 @@ TARGET_NAME = libghostutil.a
 TARGET_OBJS =  $(OBJ_DIR)/GraphicUtil.o \
 			   $(OBJ_DIR)/SystemUtil.o
 
+NEWLIB_OBJS =   $(OBJ_DIR)/close.o              \
+				$(OBJ_DIR)/environ.o            \
+				$(OBJ_DIR)/execve.o             \
+				$(OBJ_DIR)/fork.o               \
+				$(OBJ_DIR)/fstat.o              \
+				$(OBJ_DIR)/getpid.o             \
+				$(OBJ_DIR)/isatty.o             \
+				$(OBJ_DIR)/kill.o               \
+				$(OBJ_DIR)/link.o               \
+				$(OBJ_DIR)/lseek.o              \
+				$(OBJ_DIR)/open.o               \
+				$(OBJ_DIR)/read.o               \
+				$(OBJ_DIR)/stat.o               \
+				$(OBJ_DIR)/times.o              \
+				$(OBJ_DIR)/unlink.o             \
+				$(OBJ_DIR)/wait.o               \
+				$(OBJ_DIR)/write.o              \
+				$(OBJ_DIR)/sbrk.o               
+
+ALL_OBJS = $(TARGET_OBJS) $(NEWLIB_OBJS)
 
 all: directories $(BIN_DIR)/$(TARGET_NAME)
 
-$(BIN_DIR)/$(TARGET_NAME): $(TARGET_OBJS)
-	$(AR) $(ARFLAGS) $(BIN_DIR)/$(TARGET_NAME) $(TARGET_OBJS)
+$(BIN_DIR)/$(TARGET_NAME): $(ALL_OBJS)
+	$(AR) $(ARFLAGS) $(BIN_DIR)/$(TARGET_NAME) $(ALL_OBJS)
 
 # Build all assembly files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.s
@@ -54,6 +75,9 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CXX) $(CFLAGS) $(DEFINES) $(INCLUDE) -c $< -o $@
 
+# Build NewLibInterface files
+$(OBJ_DIR)/%.o: $(NLIB_SRC_DIR)/%.c
+	$(CC) $(CFLAGS) $(DEFINES) $(INCLUDE) -c $< -o $@
 
 directories: $(OBJ_DIR) $(BIN_DIR)
 
