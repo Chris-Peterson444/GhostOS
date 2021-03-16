@@ -43,7 +43,8 @@
 *  *******************
 */
 
-
+#define ROWS_PER_SCREEN               36
+#define CHARS_PER_ROW                 64
 #define SCREEN_BUFF_SIZE              2304   // 64 x 36
 
 

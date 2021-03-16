@@ -13,6 +13,12 @@ __attribute__((always_inline)) inline uint32_t csr_mstatus_read(void);
 //Write to mstatus
 __attribute__((always_inline)) inline void csr_mstatus_write(uint32_t val);
 
+//Read mepc
+__attribute__((always_inline)) inline uint32_t csr_mepc_read(void);
+
+//write to mepc
+__attribute__((always_inline)) inline void csr_mepc_write(uint32_t val);
+
 //Write to mie
 __attribute__((always_inline)) inline void csr_write_mie(uint32_t val);
 
@@ -21,6 +27,12 @@ __attribute__((always_inline)) inline void csr_enable_interrupts(void);
 
 //Disable Global Interrupts
 __attribute__((always_inline)) inline void csr_disable_interrupts(void);
+
+//Read from the tp register
+__attribute__((always_inline)) inline uint32_t thread_pointer_read(void);
+
+//Write to the tp register
+__attribute__((always_inline)) inline void thread_pointer_write(uint32_t val);
 
 //Disable Global Interrupts
 __attribute__((always_inline)) inline TCPUInterruptState CPUHALSuspendInterrupts(void);

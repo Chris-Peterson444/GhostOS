@@ -42,7 +42,7 @@ int _write(int file, char *ptr, int len) {
 void outbyte(char ch){
 	volatile uint8_t * textData = (volatile uint8_t *) &TEXT_DATA;
 	static uint8_t XPos = 0, YPos = 0;
-	const uint8_t CharsPerRow = 64, RowsPerScreen = 36;
+	const uint8_t CharsPerRow = CHARS_PER_ROW, RowsPerScreen = ROWS_PER_SCREEN;
 
 	switch(ch){
 		case '\n':	XPos = 0;

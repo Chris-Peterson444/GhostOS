@@ -3,6 +3,7 @@
 #include "VideoControllerMap.h"
 #include "StatusRegisterUtility.h"
 #include "VideoControllerUtility.h"
+#include "Threads.h"
 
 extern uint8_t _erodata[];
 extern uint8_t _data[];
@@ -12,6 +13,7 @@ extern uint8_t _esdata[];
 extern uint8_t _bss[];
 extern uint8_t _ebss[];
 
+volatile ThreadQueue osThreadQueue = {.currentThread = 0, .nextFree = 1};
 
 void init(void){
     uint8_t *Source = _erodata;
@@ -26,6 +28,7 @@ void init(void){
     while(Base < End){
         *Base++ = 0;
     }
+    _threadInit();               // Init threading needs
 
     csr_write_mie(0x888);       // Enable all interrupt soruces
 
@@ -35,4 +38,12 @@ void init(void){
     external_interrupt_enable_all(); //Enable all external interrupts
     // graphics_refresh_rate();
     // graphics_text_mode();
+}
+
+void _threadInit(){
+   
+    osThreadQueue.fill = 1;
+    osThreadQueue.queue[0].threadID = 0;   // Give our first thread an ID
+    osThreadQueue.queue[0].entryFunc = -1; // Give our first thread a special entry value
+
 }

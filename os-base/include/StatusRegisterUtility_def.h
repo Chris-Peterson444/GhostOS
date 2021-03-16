@@ -13,6 +13,16 @@ __attribute__((always_inline)) inline void csr_mstatus_write(uint32_t val){
     asm volatile ("csrw mstatus, %0" : : "r"(val));
 }
 
+__attribute__((always_inline)) inline uint32_t csr_mepc_read(void){
+    uint32_t result;
+    asm volatile ("csrr %0, mepc" : "=r"(result));
+    return result;
+}
+
+__attribute__((always_inline)) inline void csr_mepc_write(uint32_t val){
+    asm volatile ("csrw mepc, %0" : : "r"(val));
+}
+
 __attribute__((always_inline)) inline void csr_write_mie(uint32_t val){
     asm volatile ("csrw mie, %0" : : "r"(val));
 }
@@ -23,6 +33,16 @@ __attribute__((always_inline)) inline void csr_enable_interrupts(void){
 
 __attribute__((always_inline)) inline void csr_disable_interrupts(void){
     asm volatile ("csrci mstatus, 0x8");
+}
+
+__attribute__((always_inline)) inline uint32_t thread_pointer_read(void){
+    uint32_t result;
+    asm volatile ("mv %0, tp" : "=r"(result));
+    return result;
+}
+
+__attribute__((always_inline)) inline void thread_pointer_write(uint32_t val){
+    asm volatile ("mv tp, %0" : : "r"(val));
 }
 
 

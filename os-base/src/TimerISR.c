@@ -2,11 +2,13 @@
 
 #include <stdint.h>
 #include "ChipsetRegisters.h"
+#include "Threads.h"
 
 extern volatile int global;
 extern volatile uint32_t controller_status;
 extern void timer_callback(void);
 volatile uint32_t TimerTicks = 0;
+extern volatile ThreadQueue osThreadQueue;
 
 void timer_ISR(void){
 
@@ -18,5 +20,6 @@ void timer_ISR(void){
 	global++;
 	controller_status = CONTROLLER_STATUS;
  	TimerTicks++;
+ 	CPUHALSwitchThread(&osThreadQueue);
 
 }

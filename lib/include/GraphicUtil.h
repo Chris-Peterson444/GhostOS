@@ -23,5 +23,4 @@ uint32_t imageFill(uint32_t background, uint8_t* buff, uint32_t size);
 uint32_t clearTextScreen();
 
 
-
 #endif

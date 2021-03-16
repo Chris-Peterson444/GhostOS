@@ -27,7 +27,7 @@ volatile char *SPRITE = (volatile char *)(0x500FF114);
 volatile uint32_t *PALETTE = (volatile uint32_t *)(0x500FC000);
 volatile uint32_t *BACK_CTRL = (volatile uint32_t *)(0x500FF100);
 
-
+extern volatile ThreadQueue osThreadQueue;
 
 
 extern volatile uint32_t TimerTicks;
@@ -40,11 +40,29 @@ uint32_t Thread1(void *ptr){
         if(LastTicks != TimerTicks){
             printf("T: %d\r",TimerTicks);
             fflush(stdout);
-            if((LastTicks / 100) != (TimerTicks / 100)){
-                TCPUInterruptState PreviousState = CPUHALSuspendInterrupts();
-                CPUHALContextSwitch(&ThreadPointers[1],ThreadPointers[0]);
-                CPUHALResumeInterrupts(PreviousState);
-            }
+            // if((LastTicks / 100) != (TimerTicks / 100)){
+            //     TCPUInterruptState PreviousState = CPUHALSuspendInterrupts();
+            //     CPUHALContextSwitch(&ThreadPointers[1],ThreadPointers[0]);
+            //     CPUHALResumeInterrupts(PreviousState);
+            // }
+            LastTicks = TimerTicks;
+        }
+    }
+} 
+
+uint32_t Thread2(void *ptr){
+    TCPUStackRef *ThreadPointers = (TCPUStackRef *)ptr;
+    uint32_t LastTicks = TimerTicks;
+    // csr_enable_interrupts();
+    while(1){
+        if(LastTicks != TimerTicks){
+            printf("T: %d\r",TimerTicks);
+            fflush(stdout);
+            // if((LastTicks / 100) != (TimerTicks / 100)){
+            //     TCPUInterruptState PreviousState = CPUHALSuspendInterrupts();
+            //     CPUHALContextSwitch(&ThreadPointers[1],ThreadPointers[0]);
+            //     CPUHALResumeInterrupts(PreviousState);
+            // }
             LastTicks = TimerTicks;
         }
     }
@@ -52,20 +70,25 @@ uint32_t Thread1(void *ptr){
 
 
 
+
 int main() {
 
     // printf("%s\n", "Please insert cartridge");
 
-
+    _clearText();
     uint32_t LastTicks = 0;
     uint32_t Thread1Stack[2048];
     TCPUStackRef ThreadPointers[2];
     ThreadPointers[1] = CPUHALContextInitialize((TCPUStackRef)(Thread1Stack+2048),Thread1,ThreadPointers);
+
     printf("Hello World\n");
 
     for(int i = 0; i < 14; i++){
         printf("%2d: %08X @%p\n",13 - i, ThreadPointers[1][13-i],&ThreadPointers[1][13-i]);
     }
+    TCPUInterruptState PreviousState = CPUHALSuspendInterrupts();
+    CPUHALAddThread(&osThreadQueue,ThreadPointers[1],Thread2);
+    CPUHALResumeInterrupts(PreviousState);
 
 
 
@@ -80,17 +103,17 @@ int main() {
         //     last_global = global;
         // }
 
-            if(LastTicks != TimerTicks){
-            printf("M: %d\r",TimerTicks);
-            fflush(stdout);
-            
-            if((LastTicks / 100) != (TimerTicks / 100)){
-                TCPUInterruptState PreviousState = CPUHALSuspendInterrupts();
-                CPUHALContextSwitch(&ThreadPointers[0],ThreadPointers[1]);
-                CPUHALResumeInterrupts(PreviousState);
-            }
-            LastTicks = TimerTicks;
-        }
+                            if(LastTicks != TimerTicks){
+                            printf("M: %d\r",TimerTicks);
+                            fflush(stdout);
+                            
+                            // if((LastTicks / 100) != (TimerTicks / 100)){
+                            //     TCPUInterruptState PreviousState = CPUHALSuspendInterrupts();
+                            //     CPUHALContextSwitch(&ThreadPointers[0],ThreadPointers[1]);
+                            //     CPUHALResumeInterrupts(PreviousState);
+                            // }
+                            LastTicks = TimerTicks;
+                        }
 
 
 

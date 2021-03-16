@@ -41,7 +41,8 @@ STARTUP_OBJS = 	$(OBJ_DIR)/main.o               \
                 $(OBJ_DIR)/startup.o            \
                 $(OBJ_DIR)/InterruptHandler.o   \
                 $(OBJ_DIR)/TimerISR.o           \
-                $(OBJ_DIR)/Threads.o
+                $(OBJ_DIR)/ThreadsASM.o         \
+                $(OBJ_DIR)/ThreadsC.o
 
 SYSCALL_OBJS =  $(OBJ_DIR)/Syscalls.o
 
