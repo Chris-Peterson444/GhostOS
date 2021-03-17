@@ -54,7 +54,6 @@ uint32_t Thread1(void *ptr){
 uint32_t Thread2(void *ptr){
     TCPUStackRef *ThreadPointers = (TCPUStackRef *)ptr;
     uint32_t LastTicks = TimerTicks;
-    // csr_enable_interrupts();
     uint32_t seconds = 0;
 
     ThreadContext* context = CPUHALGetSelfContext();
@@ -63,37 +62,12 @@ uint32_t Thread2(void *ptr){
     CPUHALThreadStatus(context, WAIT);
 
     while(1){
-        // if(LastTicks != TimerTicks){
-        //     printf("T: %d\r",TimerTicks);
-        //     fflush(stdout);
-
-        //     // if((LastTicks / 100) != (TimerTicks / 100)){
-        //     //     TCPUInterruptState PreviousState = CPUHALSuspendInterrupts();
-        //     //     CPUHALContextSwitch(&ThreadPointers[1],ThreadPointers[0]);
-        //     //     CPUHALResumeInterrupts(PreviousState);
-        //     // }
-        //     LastTicks = TimerTicks;
-        // }
 
         printf("seconds: %d\r",seconds);
         fflush(stdout);
 
         _sleep(1000);
         seconds++;
-
-    //     ThreadContext* context = CPUHALGetSelfContext();
-    // printf("Thread 1 context: %08X\n",context);
-    // fflush(stdout);
-
-        // printf("threadID %d\n",context->threadID );
-        // fflush(stdout);
-        // CPUHALThreadStatus(context,WAIT);
-        // if(context->ready == READY){
-        //    CPUHALThreadStatus(context,WAIT)
-        // }
-        // else{
-        //     CPUHALThreadStatus(context,WAIT)
-        // }
     }
 } 
 

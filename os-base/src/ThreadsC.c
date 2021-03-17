@@ -56,12 +56,6 @@ ThreadContext* CPUHALQueueThread(volatile ThreadQueue *queue,TCPUStackRef stackt
 	context->wasSuspended = false;
 	queue->fill++;
 
-	// printf("adding thread %d\n",free);
-	// printf("threadID %d\n",free );
-	// printf("Ready stat: %d\n",context->ready);
-	// printf("Found @%08X\n",context );
-	// fflush(stdout);
-
 	if (free + 1 < MAX_THREADS){
 		free = queue->nextFree++;
 	}
@@ -89,10 +83,6 @@ uint32_t CPUHALRemoveThread(ThreadQueue *queue, uint32_t threadID){
 //Called from inside the OS 
 void _CPUHALThreadSuspend(ThreadContext* context){
 	int ready = context->ready;
-	// TCPUInterruptState PreviousState = CPUHALSuspendInterrupts();
-
-	// printf("made it in to the suspend function\n");
-	// fflush(stdout);
 
 	//I could do something like give up the thread early, but that's for the future
 	// CPUHALThreadSwitch(mainManager, NON_INTERRUPT);
@@ -100,9 +90,6 @@ void _CPUHALThreadSuspend(ThreadContext* context){
 	while(!ready){
 		ready = context->ready;
 	}
-
-	// CPUHALThreadSwitch(mainManager);
-	// CPUHALResumeInterrupts(PreviousState);
 
 }
 
@@ -123,7 +110,7 @@ ThreadContext* CPUHALGetSelfContext(){
 	return context;
 }
 
-void CPUHALThreadSwitch(volatile ThreadQueueManager* manager, int caller){
+void CPUHALThreadSwitch(volatile ThreadQueueManager* manager){
 
 	ThreadQueue *workingQueue;
 	ThreadQueue *otherQueue;
@@ -152,19 +139,14 @@ void CPUHALThreadSwitch(volatile ThreadQueueManager* manager, int caller){
 
 	int found = false;
 
-	// printf("Entered\n");
-	// fflush(stdout);
 
 	//Check if at the end of the queue. 
 	if (oldID == (workingQueue->fill - 1)){
-		// printf("in here\n");
-		// fflush(stdout);
+
 		//Check if there's anything to do in the other queue
 		if( otherQueue->fill == 0){
 			// don't switch queues, but switch threads
 			newID = 0;
-				// printf("NewID: %d\n",newID );
-				// fflush(stdout);
 
 			while(!found){
 				if(workingQueue->queue[newID].ready == READY){
@@ -200,8 +182,7 @@ void CPUHALThreadSwitch(volatile ThreadQueueManager* manager, int caller){
 		}
 		else{
 			//switch
-			// printf("in here\n");
-			// fflush(stdout);
+
 			//do some bookkeeping on the old queue before switching
 			workingQueue->nextThread = 0;
 			workingQueue->currentThread = -1;
@@ -210,8 +191,7 @@ void CPUHALThreadSwitch(volatile ThreadQueueManager* manager, int caller){
 			newID = otherQueue->nextThread;
 			int cyle = newID;
 			while(!found){
-				// printf("NewID: %d\n",newID );
-				// fflush(stdout);
+
 
 				if(otherQueue->queue[newID].ready == READY){
 					found = true;
@@ -234,9 +214,7 @@ void CPUHALThreadSwitch(volatile ThreadQueueManager* manager, int caller){
 
 			otherQueue->currentThread = newID;
 			otherQueue->nextThread = newID + 1;
-			// if(newID + 1 > otherQueue-> fill - 1){
 
-			// }
 			if(otherQueue->nextThread >= otherQueue->fill - 1){
 				otherQueue->nextThread = 0;
 			}
@@ -255,15 +233,9 @@ void CPUHALThreadSwitch(volatile ThreadQueueManager* manager, int caller){
 		//There's more in the queue
 		newID = workingQueue->nextThread;
 		ThreadQueue *tempQueue = workingQueue;
-		// printf("working queue @%08X\n",workingQueue);
-		// printf("temp queue    @%08X\n",tempQueue);
-		// fflush(stdout);
-		// printf("NewID: %d\n",newID );
-		// printf("NewID Ready stat: %d\n",tempQueue->queue[newID].ready);
-				// fflush(stdout);
+
 		while(!found){
-				// printf("NewID: %d\n",newID );
-				// fflush(stdout);
+
 
 			if(tempQueue->queue[newID].ready == READY){
 				found = true;
@@ -306,30 +278,15 @@ void CPUHALThreadSwitch(volatile ThreadQueueManager* manager, int caller){
 		}
 	}
 
-	// printf("oldID: %d, newID:%d\n",oldID, newID);
-	// fflush(stdout);
 
 	manager->currQueue = newQueue;
 
-	if(caller == INTERRUPT){
-		switchThreads(oldContext, newContext);
-	}
-	else{
-		softwareSwitch(oldContext, newContext);
-	}
+	switchThreads(oldContext, newContext);
 
 }
 
 //Only come in from interrupt service routine
 void switchThreads(ThreadContext *oldContext, ThreadContext* newContext){
-
-	// printf("entered interrupt switch\n");
-	// fflush(stdout);
-	// printf("switching\n");
-	// fflush(stdout);
-
-	// printf("New ThreadID: %d   NewMEPC: %08X\n",newContext->threadID,newContext->mepcVal);
-	// fflush(stdout);
 
 	//Get the current threads value in the MEPC and store it for the thread
 	uint32_t currMepc = csr_mepc_read();
@@ -339,58 +296,12 @@ void switchThreads(ThreadContext *oldContext, ThreadContext* newContext){
 	uint32_t tp = thread_pointer_read();
 	oldContext->stackPointer = (uint32_t *) tp;
 
-	// //Change the MEPC value to the previous threads
-	// csr_mepc_write(newContext->mepcVal);
+	//Change the MEPC value to the previous threads
+	csr_mepc_write(newContext->mepcVal);
 
-	// 	printf("oldContext ID,RS,SS: %d,%d,%d  newContext ID,RS,SS: %d,%d,%d\n",oldContext->threadID,oldContext->ready, oldContext->wasSuspended, newContext->threadID, newContext->ready, newContext->wasSuspended);
-	// fflush(stdout);
-	//Special return for suspended processes
-	if(newContext->wasSuspended == true){
-		printf("There was a suspended context. It was thread %d\n", newContext->threadID);
-		fflush(stdout);
-		//Set flag
-		newContext->wasSuspended = false;
-		CPUHALNonInterruptContextSwitchIntToSoft(newContext->stackPointer, newContext);
-	}
-	else{
-		// printf("only here\n");
-		// fflush(stdout);
-		//Reset the stack and jump out
-
-		//Change the MEPC value to the previous threads
-		csr_mepc_write(newContext->mepcVal);
-
-		CPUHALContextSwitch(newContext->stackPointer, newContext);
-	}
-
-}
-
-// //Come in from software
-void softwareSwitch(ThreadContext *oldContext, ThreadContext* newContext){
-	printf("entered software switch\n");
-	fflush(stdout);
-	//Get the current threads return value and store it as the mepc for the thread
-	uint32_t returnAddress = reg_ra_read();
-	oldContext->mepcVal = returnAddress;
-	oldContext->wasSuspended = true;
-	printf("second\n");
-	fflush(stdout);
-	// //Get the current stackpointer and save it
-	// uint32_t sp = reg_sp_read();
-	// oldContext->stackPointer = (uint32_t *) sp;
-	// printf("oldContext ID: %d  newContext ID: %d\n",oldContext->threadID, newContext->threadID);
-	// fflush(stdout);
-	if(newContext->wasSuspended == true){
-		//Set flag
-		newContext->wasSuspended = false;
-		CPUHALNonInterruptContextSwitchSoftToSoft(&(oldContext->stackPointer),newContext->stackPointer, newContext);
-	}
-	else{
-		//Change the MEPC value to the previous threads
-		csr_mepc_write(newContext->mepcVal);
-		//Save the Old stack, reset the new one and jump out
-		CPUHALNonInterruptContextSwitchSoftToInt(&(oldContext->stackPointer),newContext->stackPointer, newContext);
-	}
-
+	//Reset the stack and jump out
+	CPUHALContextSwitch(newContext->stackPointer, newContext);
 	
+
 }
+

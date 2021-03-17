@@ -15,10 +15,6 @@
 #define true 1
 #define false 0
 
-#define INTERRUPT 1
-
-#define NON_INTERRUPT 0
-
 typedef uint32_t TCPUInterruptState, *TCPUInterruptSateRef;
 typedef uint32_t *TCPUStackRef;
 typedef uint32_t (*TCPUContextEntry)(void *param);
@@ -51,10 +47,6 @@ typedef struct ThreadQueueManager {
 //Assembly defined
 TCPUStackRef CPUHALContextInitialize(TCPUStackRef stacktop, TCPUContextEntry entry, void *param);
 void CPUHALContextSwitch(TCPUStackRef restore, ThreadContext* context);
-void CPUHALNonInterruptContextSwitchSoftToInt(TCPUStackRef *save, TCPUStackRef restore, ThreadContext* context);
-void CPUHALNonInterruptContextSwitchSoftToSoft(TCPUStackRef *save, TCPUStackRef restore, ThreadContext* context);
-void CPUHALNonInterruptContextSwitchIntToSoft(TCPUStackRef restore, ThreadContext* context);
-
 
 //C defined
 
@@ -63,7 +55,7 @@ void _threadInit(ThreadQueueManager *manager);
 ThreadContext* CPUHALQueueThread(volatile ThreadQueue *queue, TCPUStackRef stacktop, TCPUContextEntry entry);
 ThreadContext* CPUHALAddThread(volatile ThreadQueueManager* manager, TCPUStackRef stacktop, TCPUContextEntry entry, int type);
 uint32_t CPUHALRemoveThread(ThreadQueue *queue, uint32_t threadID);
-void CPUHALThreadSwitch(volatile ThreadQueueManager* manager, int caller);
+void CPUHALThreadSwitch(volatile ThreadQueueManager* manager);
 void CPUHALThreadStatus(ThreadContext* context, int ready);
 ThreadContext* CPUHALGetSelfContext();
 void _CPUHALThreadSuspend(ThreadContext* context);
