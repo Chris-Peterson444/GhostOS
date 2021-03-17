@@ -56,6 +56,12 @@ uint32_t Thread2(void *ptr){
     uint32_t LastTicks = TimerTicks;
     // csr_enable_interrupts();
     uint32_t seconds = 0;
+
+    ThreadContext* context = CPUHALGetSelfContext();
+    // printf("Thread 1 context: %08X\n",context);
+    // fflush(stdout);
+    CPUHALThreadStatus(context, WAIT);
+
     while(1){
         // if(LastTicks != TimerTicks){
         //     printf("T: %d\r",TimerTicks);
@@ -69,16 +75,19 @@ uint32_t Thread2(void *ptr){
         //     LastTicks = TimerTicks;
         // }
 
-        // printf("seconds: %d\r",seconds);
-        // fflush(stdout);
+        printf("seconds: %d\r",seconds);
+        fflush(stdout);
 
-        // _sleep(1000);
+        _sleep(1000);
         seconds++;
 
-        ThreadContext* context = CPUHALGetSelfContext();
+    //     ThreadContext* context = CPUHALGetSelfContext();
+    // printf("Thread 1 context: %08X\n",context);
+    // fflush(stdout);
+
         // printf("threadID %d\n",context->threadID );
         // fflush(stdout);
-        CPUHALThreadStatus(context,WAIT);
+        // CPUHALThreadStatus(context,WAIT);
         // if(context->ready == READY){
         //    CPUHALThreadStatus(context,WAIT)
         // }
@@ -107,6 +116,8 @@ int main() {
     //     printf("%2d: %08X @%p\n",13 - i, ThreadPointers[1][13-i],&ThreadPointers[1][13-i]);
     // }
     ThreadContext* thread1Context = CPUHALAddThread(&TQManager, ThreadPointers[1],Thread2, OS_THREAD);
+    // printf("Thread 1 context: %08X\n",thread1Context);
+    // fflush(stdout);
     // printf("thread1tp %08X\r",thread1Context);
     // fflush(stdout);
 
@@ -126,8 +137,12 @@ int main() {
                             printf("M: %d\r",TimerTicks);
                             fflush(stdout);
                             LastTicks = TimerTicks;
-                            // _sleep(1000);
-                            // CPUHALThreadStatus(thread1Context, READY);
+
+                            // _sleep(60000);
+                            if (LastTicks = 1000){
+                                CPUHALThreadStatus(thread1Context, READY);
+                            }
+                            
                         }
 
 

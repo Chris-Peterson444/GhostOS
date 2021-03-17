@@ -28,6 +28,11 @@ void _threadInit(ThreadQueueManager *manager){
     manager->osThreadQueue.queue[0].ready = READY;   //Make our first thread ready
     manager->osThreadQueue.queue[0].wasSuspended = false;
 
+    manager->appThreadQueue.currentThread = 0;
+    manager->appThreadQueue.nextFree = 0;
+    manager->appThreadQueue.fill = 0;
+    manager->appThreadQueue.nextThread = 0;
+
     //Get a local reference for syscalls
     mainManager = manager;
 
@@ -41,17 +46,21 @@ ThreadContext* CPUHALQueueThread(volatile ThreadQueue *queue,TCPUStackRef stackt
 		return NULL;
 	}
 	queue->nextFree += 1;
-	ThreadContext *context = &(queue->queue[queue->nextFree]);
+
+	ThreadContext *context = &(queue->queue[free]);
 	context->stackPointer = stacktop;
 	context->threadID = free;
 	context->entryFunc = entry;
 	context->mepcVal = (uint32_t) *entry;
-	context->ready = READY;
+	context->ready = (int) READY;
 	context->wasSuspended = false;
 	queue->fill++;
 
-	printf("adding thread %d\n",free);
-	fflush(stdout);
+	// printf("adding thread %d\n",free);
+	// printf("threadID %d\n",free );
+	// printf("Ready stat: %d\n",context->ready);
+	// printf("Found @%08X\n",context );
+	// fflush(stdout);
 
 	if (free + 1 < MAX_THREADS){
 		free = queue->nextFree++;
@@ -82,6 +91,9 @@ void _CPUHALThreadSuspend(ThreadContext* context){
 	int ready = context->ready;
 	// TCPUInterruptState PreviousState = CPUHALSuspendInterrupts();
 
+	// printf("made it in to the suspend function\n");
+	// fflush(stdout);
+
 	//I could do something like give up the thread early, but that's for the future
 	// CPUHALThreadSwitch(mainManager, NON_INTERRUPT);
 
@@ -100,7 +112,7 @@ void CPUHALThreadStatus(ThreadContext* context, int ready){
 
 	ThreadContext* thisContext = (ThreadContext* ) CPUHALGetSelfContext();
 	// Check if we're setting ourself to wait
-	if( (thisContext == context) && ready == WAIT){
+	if( (thisContext == context) && (ready == WAIT)){
 		_CPUHALThreadSuspend(context);
 	}
 
@@ -140,6 +152,8 @@ void CPUHALThreadSwitch(volatile ThreadQueueManager* manager, int caller){
 
 	int found = false;
 
+	// printf("Entered\n");
+	// fflush(stdout);
 
 	//Check if at the end of the queue. 
 	if (oldID == (workingQueue->fill - 1)){
@@ -149,6 +163,9 @@ void CPUHALThreadSwitch(volatile ThreadQueueManager* manager, int caller){
 		if( otherQueue->fill == 0){
 			// don't switch queues, but switch threads
 			newID = 0;
+				// printf("NewID: %d\n",newID );
+				// fflush(stdout);
+
 			while(!found){
 				if(workingQueue->queue[newID].ready == READY){
 					found = true;
@@ -173,12 +190,12 @@ void CPUHALThreadSwitch(volatile ThreadQueueManager* manager, int caller){
 			workingQueue->currentThread = newID;
 			newContext = &(workingQueue->queue[newID]);
 
-		if(workingQueue == &(manager->osThreadQueue)){
-			newQueue = OS_QUEUE;
-		}
-		else{
-			newQueue = APP_QUEUE;
-		}
+			if(workingQueue == &(manager->osThreadQueue)){
+				newQueue = OS_QUEUE;
+			}
+			else{
+				newQueue = APP_QUEUE;
+			}
 
 		}
 		else{
@@ -193,7 +210,9 @@ void CPUHALThreadSwitch(volatile ThreadQueueManager* manager, int caller){
 			newID = otherQueue->nextThread;
 			int cyle = newID;
 			while(!found){
-				
+				// printf("NewID: %d\n",newID );
+				// fflush(stdout);
+
 				if(otherQueue->queue[newID].ready == READY){
 					found = true;
 				}
@@ -222,14 +241,15 @@ void CPUHALThreadSwitch(volatile ThreadQueueManager* manager, int caller){
 				otherQueue->nextThread = 0;
 			}
 			newContext = &(otherQueue->queue[newID]);
+
+			if(otherQueue == &(manager->osThreadQueue)){
+				newQueue = OS_QUEUE;
+			}
+			else{
+				newQueue = APP_QUEUE;
+			}
 		}
 
-		if(otherQueue == &(manager->osThreadQueue)){
-			newQueue = OS_QUEUE;
-		}
-		else{
-			newQueue = APP_QUEUE;
-		}
 	}
 	else{
 		//There's more in the queue
@@ -238,17 +258,25 @@ void CPUHALThreadSwitch(volatile ThreadQueueManager* manager, int caller){
 		// printf("working queue @%08X\n",workingQueue);
 		// printf("temp queue    @%08X\n",tempQueue);
 		// fflush(stdout);
+		// printf("NewID: %d\n",newID );
+		// printf("NewID Ready stat: %d\n",tempQueue->queue[newID].ready);
+				// fflush(stdout);
 		while(!found){
+				// printf("NewID: %d\n",newID );
+				// fflush(stdout);
+
 			if(tempQueue->queue[newID].ready == READY){
 				found = true;
 			}
 			else{
 				newID++;
-				if(newID == tempQueue->fill - 1){
+				if(newID >= tempQueue->fill - 1){
 					//Reach end of queue without finding anything
 
 					//Try other queue first, but only if it's not empty
 					if(otherQueue->fill > 0){
+						// printf("Whoops\n");
+						// fflush(stdout);
 						if(tempQueue == workingQueue){
 							newID = otherQueue->nextThread;
 							tempQueue = otherQueue;
@@ -278,6 +306,8 @@ void CPUHALThreadSwitch(volatile ThreadQueueManager* manager, int caller){
 		}
 	}
 
+	// printf("oldID: %d, newID:%d\n",oldID, newID);
+	// fflush(stdout);
 
 	manager->currQueue = newQueue;
 
@@ -335,7 +365,7 @@ void switchThreads(ThreadContext *oldContext, ThreadContext* newContext){
 
 }
 
-//Come in from software
+// //Come in from software
 void softwareSwitch(ThreadContext *oldContext, ThreadContext* newContext){
 	printf("entered software switch\n");
 	fflush(stdout);
