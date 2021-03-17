@@ -3,9 +3,7 @@
 #include "Threads.h"
 #include "StatusRegisterUtility.h"
 
-
-// volatile ThreadQueue osThreadQueue = {.currentThread = 0, .nextFree = 1};
-// register char *stack_ptr asm ("sp");
+void switchThreads(ThreadContext *oldContext, ThreadContext* newContext);
 
 //This is only run by the main thread of the system
 void _threadInit(ThreadQueueManager *manager){
@@ -13,13 +11,16 @@ void _threadInit(ThreadQueueManager *manager){
 	//Set the main stack pointer
 	register char *stack_ptr asm ("sp");
 	manager->mainStackPointer = stack_ptr;
+	manager->currQueue = OS_QUEUE;
 
 	//Set the main thread info
     manager->osThreadQueue.fill = 1;
     manager->osThreadQueue.currentThread = 0;
+     manager->osThreadQueue.nextThread = 1;
     manager->osThreadQueue.nextFree = 1;
     manager->osThreadQueue.queue[0].threadID = 0;   // Give our first thread an ID
-    manager->osThreadQueue.queue[0].entryFunc = -1; // Give our first thread a special entry value
+    manager->osThreadQueue.queue[0].entryFunc = (TCPUContextEntry) -1; // Give our first thread a special entry value
+    manager->osThreadQueue.queue[0].ready = true;   //Make our first thread ready
 
 }
 
@@ -62,36 +63,83 @@ uint32_t CPUHALRemoveThread(ThreadQueue *queue, uint32_t threadID){
 	return 0;
 }
 
-void CPUHALSwitchThread(ThreadQueue *queue){
+void CPUHALThreadSwitch(volatile ThreadQueueManager* manager){
 
-	// ThreadQueue *queue = &(manager->osThreadQueue);
-	int id = queue->currentThread;
+	ThreadQueue *workingQueue;
+	ThreadQueue *otherQueue;
+
+	switch(manager->currQueue){
+		case OS_QUEUE: 		workingQueue = &(manager->osThreadQueue);
+					   		otherQueue = &(manager->appThreadQueue);
+					   		break;
+		case APP_THREAD:	workingQueue = &(manager->appThreadQueue);
+							otherQueue = &(manager->osThreadQueue);
+							break;
+		default:
+			printf("Invalid Thread Queue\n");
+			fflush(stdout);
+			return;
+	}
+
+	ThreadContext *oldContext;
+	ThreadContext *newContext;
+	int oldID = workingQueue->currentThread;
 	int newID;
 
-	// Always going to go left to right in queue
-	//Check if at the end of the queue
-	if ( (id == MAX_THREADS - 1) || (id == queue->fill - 1) ){
-		newID = 0;
+	oldContext = &(workingQueue->queue[oldID]);
+
+	//Check if at the end of the queue. 
+	if (oldID == (workingQueue->fill - 1)){
+
+		//Check if there's anything to do in the other queue
+		if( otherQueue->fill == 0){
+			// don't switch queues, but switch threads
+			workingQueue->nextThread = 1;
+			workingQueue->currentThread = 0;
+			newContext = &(workingQueue->queue[0]);
+		}
+		else{
+			//switch
+			//do some bookkeeping on the old queue before switching
+			workingQueue->nextThread = 0;
+			workingQueue->currentThread = -1;
+
+			//Work on the new queue
+			otherQueue->currentThread = otherQueue->nextThread;
+			otherQueue->nextThread++;
+			if(otherQueue->nextThread == otherQueue->fill){
+				otherQueue->nextThread = 0;
+			}
+			newContext = &(otherQueue->queue[otherQueue->currentThread]);
+		}
 	}
 	else{
-		newID = id + 1;
+		//There's more in the queue
+		workingQueue->currentThread  = workingQueue->nextThread;
+		workingQueue->nextThread++;
+		if(workingQueue->nextThread == workingQueue->fill){
+			workingQueue->nextThread = 0;
+		}
+		newContext = &(workingQueue->queue[workingQueue->currentThread]);
 	}
-	queue->currentThread = newID;
+	switchThreads(oldContext, newContext);
 
+}
+
+void switchThreads(ThreadContext *oldContext, ThreadContext* newContext){
 
 	//Get the current threads value in the MEPC and store it for the thread
 	uint32_t currMepc = csr_mepc_read();
-	queue->queue[id].mepcVal = currMepc;
+	oldContext->mepcVal = currMepc;
 
 	//Get the pre-interrupt stackpointer and save it
 	uint32_t tp = thread_pointer_read();
-	queue->queue[id].stackPointer = (uint32_t *) tp;
+	oldContext->stackPointer = (uint32_t *) tp;
 
 	//Change the MEPC value to the previous threads
-	csr_mepc_write(queue->queue[newID].mepcVal);
+	csr_mepc_write(newContext->mepcVal);
 
 	//Reset the stack and jump out
-	CPUHALContextSwitch(queue->queue[newID].stackPointer);
+	CPUHALContextSwitch(newContext->stackPointer);
 	//Nothing below this line is executed!!
-
 }

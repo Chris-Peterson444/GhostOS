@@ -8,6 +8,7 @@
 #include "InterruptHandler.h"
 #include "StatusRegisterUtility.h"
 #include "Threads.h"
+#include "Sleep.h"
 
 extern volatile int CartridgeInserted;
 extern TEntryFunction EntryFunction;
@@ -54,17 +55,28 @@ uint32_t Thread2(void *ptr){
     TCPUStackRef *ThreadPointers = (TCPUStackRef *)ptr;
     uint32_t LastTicks = TimerTicks;
     // csr_enable_interrupts();
+    uint32_t seconds = 0;
     while(1){
-        if(LastTicks != TimerTicks){
-            printf("T: %d\r",TimerTicks);
-            fflush(stdout);
-            // if((LastTicks / 100) != (TimerTicks / 100)){
-            //     TCPUInterruptState PreviousState = CPUHALSuspendInterrupts();
-            //     CPUHALContextSwitch(&ThreadPointers[1],ThreadPointers[0]);
-            //     CPUHALResumeInterrupts(PreviousState);
-            // }
-            LastTicks = TimerTicks;
-        }
+        // if(LastTicks != TimerTicks){
+        //     // printf("T: %d\r",TimerTicks);
+        //     // printf("Seconds: %d\r",seconds);
+        //     // fflush(stdout);
+        //     _sleep(100);
+        //     seconds++;
+        //     // printf("done sleepin\n");
+        //     // fflush(stdout);
+        //     // if((LastTicks / 100) != (TimerTicks / 100)){
+        //     //     TCPUInterruptState PreviousState = CPUHALSuspendInterrupts();
+        //     //     CPUHALContextSwitch(&ThreadPointers[1],ThreadPointers[0]);
+        //     //     CPUHALResumeInterrupts(PreviousState);
+        //     // }
+        //     LastTicks = TimerTicks;
+        // }
+        _sleep(1000);
+        seconds++;
+        printf("seconds: %d\r",seconds);
+        fflush(stdout);
+
     }
 } 
 
@@ -77,7 +89,7 @@ int main() {
 
     _clearText();
     uint32_t LastTicks = 0;
-    uint32_t Thread1Stack[2048];
+    uint32_t Thread1Stack[8192];
     TCPUStackRef ThreadPointers[2];
     ThreadPointers[1] = CPUHALContextInitialize((TCPUStackRef)(Thread1Stack+2048),Thread1,ThreadPointers);
 
@@ -102,8 +114,8 @@ int main() {
         // }
 
                             if(LastTicks != TimerTicks){
-                            printf("M: %d\r",TimerTicks);
-                            fflush(stdout);
+                            // printf("M: %d\r",TimerTicks);
+                            // fflush(stdout);
                             LastTicks = TimerTicks;
                         }
 

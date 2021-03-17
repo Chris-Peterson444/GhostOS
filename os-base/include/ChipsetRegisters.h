@@ -28,4 +28,11 @@
 
 
 
+#define MACHINE_CLOCK_REG            (*((volatile uint32_t *)0x40000040))
+
+
+
+
+
+
 #endif
