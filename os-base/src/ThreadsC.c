@@ -4,7 +4,26 @@
 #include "StatusRegisterUtility.h"
 
 
-uint32_t CPUHALAddThread(ThreadQueue *queue,TCPUStackRef stacktop, TCPUContextEntry entry){
+// volatile ThreadQueue osThreadQueue = {.currentThread = 0, .nextFree = 1};
+// register char *stack_ptr asm ("sp");
+
+//This is only run by the main thread of the system
+void _threadInit(ThreadQueueManager *manager){
+
+	//Set the main stack pointer
+	register char *stack_ptr asm ("sp");
+	manager->mainStackPointer = stack_ptr;
+
+	//Set the main thread info
+    manager->osThreadQueue.fill = 1;
+    manager->osThreadQueue.currentThread = 0;
+    manager->osThreadQueue.nextFree = 1;
+    manager->osThreadQueue.queue[0].threadID = 0;   // Give our first thread an ID
+    manager->osThreadQueue.queue[0].entryFunc = -1; // Give our first thread a special entry value
+
+}
+
+uint32_t CPUHALQueueThread(ThreadQueue *queue,TCPUStackRef stacktop, TCPUContextEntry entry){
 
 	//If the queue is full, can't add more
 	int free = queue->nextFree;
@@ -25,12 +44,27 @@ uint32_t CPUHALAddThread(ThreadQueue *queue,TCPUStackRef stacktop, TCPUContextEn
 	return free;
 }
 
+uint32_t CPUHALAddThread(volatile ThreadQueueManager* manager, TCPUStackRef stacktop, TCPUContextEntry entry, int type){
+
+	uint32_t rv;
+	TCPUInterruptState PreviousState = CPUHALSuspendInterrupts();
+	switch (type){
+		case OS_THREAD:  rv = CPUHALQueueThread(&(manager->osThreadQueue), stacktop, entry);
+						 break;
+		case APP_THREAD: rv = CPUHALQueueThread(&(manager->appThreadQueue), stacktop, entry);
+						 break;
+	}
+	CPUHALResumeInterrupts(PreviousState);
+	return rv;
+}
+
 uint32_t CPUHALRemoveThread(ThreadQueue *queue, uint32_t threadID){
 	return 0;
 }
 
 void CPUHALSwitchThread(ThreadQueue *queue){
 
+	// ThreadQueue *queue = &(manager->osThreadQueue);
 	int id = queue->currentThread;
 	int newID;
 
@@ -60,6 +94,4 @@ void CPUHALSwitchThread(ThreadQueue *queue){
 	CPUHALContextSwitch(queue->queue[newID].stackPointer);
 	//Nothing below this line is executed!!
 
- 	//Useless return for compiler
-	return 0;
 }

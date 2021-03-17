@@ -27,7 +27,7 @@ volatile char *SPRITE = (volatile char *)(0x500FF114);
 volatile uint32_t *PALETTE = (volatile uint32_t *)(0x500FC000);
 volatile uint32_t *BACK_CTRL = (volatile uint32_t *)(0x500FF100);
 
-extern volatile ThreadQueue osThreadQueue;
+extern volatile ThreadQueueManager TQManager;
 
 
 extern volatile uint32_t TimerTicks;
@@ -86,9 +86,7 @@ int main() {
     for(int i = 0; i < 14; i++){
         printf("%2d: %08X @%p\n",13 - i, ThreadPointers[1][13-i],&ThreadPointers[1][13-i]);
     }
-    TCPUInterruptState PreviousState = CPUHALSuspendInterrupts();
-    CPUHALAddThread(&osThreadQueue,ThreadPointers[1],Thread2);
-    CPUHALResumeInterrupts(PreviousState);
+    CPUHALAddThread(&TQManager,ThreadPointers[1],Thread2, OS_THREAD);
 
 
 
@@ -106,12 +104,6 @@ int main() {
                             if(LastTicks != TimerTicks){
                             printf("M: %d\r",TimerTicks);
                             fflush(stdout);
-                            
-                            // if((LastTicks / 100) != (TimerTicks / 100)){
-                            //     TCPUInterruptState PreviousState = CPUHALSuspendInterrupts();
-                            //     CPUHALContextSwitch(&ThreadPointers[0],ThreadPointers[1]);
-                            //     CPUHALResumeInterrupts(PreviousState);
-                            // }
                             LastTicks = TimerTicks;
                         }
 
