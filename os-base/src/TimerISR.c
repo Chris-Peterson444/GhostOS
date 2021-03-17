@@ -20,7 +20,7 @@ void timer_ISR(void){
 	global++;
 	controller_status = CONTROLLER_STATUS;
  	TimerTicks++;
- 	CPUHALThreadSwitch(&TQManager);
+ 	CPUHALThreadSwitch(&TQManager, INTERRUPT);
 
 
 }

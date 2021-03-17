@@ -58,13 +58,9 @@ uint32_t Thread2(void *ptr){
     uint32_t seconds = 0;
     while(1){
         // if(LastTicks != TimerTicks){
-        //     // printf("T: %d\r",TimerTicks);
-        //     // printf("Seconds: %d\r",seconds);
-        //     // fflush(stdout);
-        //     _sleep(100);
-        //     seconds++;
-        //     // printf("done sleepin\n");
-        //     // fflush(stdout);
+        //     printf("T: %d\r",TimerTicks);
+        //     fflush(stdout);
+
         //     // if((LastTicks / 100) != (TimerTicks / 100)){
         //     //     TCPUInterruptState PreviousState = CPUHALSuspendInterrupts();
         //     //     CPUHALContextSwitch(&ThreadPointers[1],ThreadPointers[0]);
@@ -72,11 +68,23 @@ uint32_t Thread2(void *ptr){
         //     // }
         //     LastTicks = TimerTicks;
         // }
-        _sleep(1000);
-        seconds++;
-        printf("seconds: %d\r",seconds);
-        fflush(stdout);
 
+        // printf("seconds: %d\r",seconds);
+        // fflush(stdout);
+
+        // _sleep(1000);
+        seconds++;
+
+        ThreadContext* context = CPUHALGetSelfContext();
+        // printf("threadID %d\n",context->threadID );
+        // fflush(stdout);
+        CPUHALThreadStatus(context,WAIT);
+        // if(context->ready == READY){
+        //    CPUHALThreadStatus(context,WAIT)
+        // }
+        // else{
+        //     CPUHALThreadStatus(context,WAIT)
+        // }
     }
 } 
 
@@ -95,11 +103,12 @@ int main() {
 
     printf("Hello World\n");
 
-    for(int i = 0; i < 14; i++){
-        printf("%2d: %08X @%p\n",13 - i, ThreadPointers[1][13-i],&ThreadPointers[1][13-i]);
-    }
-    CPUHALAddThread(&TQManager,ThreadPointers[1],Thread2, OS_THREAD);
-
+    // for(int i = 0; i < 14; i++){
+    //     printf("%2d: %08X @%p\n",13 - i, ThreadPointers[1][13-i],&ThreadPointers[1][13-i]);
+    // }
+    ThreadContext* thread1Context = CPUHALAddThread(&TQManager, ThreadPointers[1],Thread2, OS_THREAD);
+    // printf("thread1tp %08X\r",thread1Context);
+    // fflush(stdout);
 
 
     while (1) {
@@ -114,9 +123,11 @@ int main() {
         // }
 
                             if(LastTicks != TimerTicks){
-                            // printf("M: %d\r",TimerTicks);
-                            // fflush(stdout);
+                            printf("M: %d\r",TimerTicks);
+                            fflush(stdout);
                             LastTicks = TimerTicks;
+                            // _sleep(1000);
+                            // CPUHALThreadStatus(thread1Context, READY);
                         }
 
 

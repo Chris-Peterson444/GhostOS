@@ -25,8 +25,8 @@ handle_non_syscall:
     .option norelax
     la      gp, __global_pointer$
     .option pop
-    mv      tp,sp
     sw      tp,44(sp)
+    mv      tp,sp
     sw      t0,40(sp)
     sw      t1,36(sp)
     sw      t2,32(sp)

@@ -46,6 +46,26 @@ __attribute__((always_inline)) inline void thread_pointer_write(uint32_t val){
 }
 
 
+__attribute__((always_inline)) inline uint32_t reg_ra_read(void){
+    uint32_t result;
+    asm volatile ("mv %0, ra" : "=r"(result));
+    return result;
+}
+
+__attribute__((always_inline)) inline void reg_sp_write(uint32_t val){
+    asm volatile ("mv sp, %0" : : "r"(val));
+}
+
+__attribute__((always_inline)) inline uint32_t reg_sp_read(void){
+    uint32_t result;
+    asm volatile ("mv %0, sp" : "=r"(result));
+    return result;
+}
+
+__attribute__((always_inline)) inline void reg_ra_write(uint32_t val){
+    asm volatile ("mv ra, %0" : : "r"(val));
+}
+
 __attribute__((always_inline)) inline TCPUInterruptState CPUHALSuspendInterrupts(void){
     uint32_t result;
     asm volatile ("csrrci %0, mstatus, 0x8" : "=r"(result));

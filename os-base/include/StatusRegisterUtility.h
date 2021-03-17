@@ -34,6 +34,19 @@ __attribute__((always_inline)) inline uint32_t thread_pointer_read(void);
 //Write to the tp register
 __attribute__((always_inline)) inline void thread_pointer_write(uint32_t val);
 
+//Read from the ra register
+__attribute__((always_inline)) inline uint32_t reg_ra_read(void);
+
+//Write to the ra register
+__attribute__((always_inline)) inline void reg_ra_write(uint32_t val);
+
+//Read from the sp register
+__attribute__((always_inline)) inline uint32_t reg_sp_read(void);
+
+//Write to the sp register
+__attribute__((always_inline)) inline void reg_sp_write(uint32_t val);
+
+
 //Disable Global Interrupts
 __attribute__((always_inline)) inline TCPUInterruptState CPUHALSuspendInterrupts(void);
 
