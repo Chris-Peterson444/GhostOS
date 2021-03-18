@@ -57,3 +57,32 @@ uint32_t CPUHALRemoveThread(ThreadQueue *queue, uint32_t threadID){
 TCPUStackRef InitializeThreadStack(TCPUStackRef stacktop, TCPUContextEntry entry, void *param){
 	return CPUHALContextInitialize( stacktop, entry, param);
 }
+
+void _CPUHALThreadSuspend(ThreadContext* context){
+	int ready = context->ready;
+
+	//I could do something like give up the thread early, but that's for the future
+	// CPUHALThreadSwitch(mainManager, NON_INTERRUPT);
+
+	while(!ready){
+		ready = context->ready;
+	}
+
+}
+
+//Need a separate version of this for the application
+void CPUHALThreadStatus(ThreadContext* context, int ready){
+	context->ready = ready;
+
+	ThreadContext* thisContext = (ThreadContext* ) CPUHALGetSelfContext();
+	// Check if we're setting ourself to wait
+	if( (thisContext == context) && (ready == WAIT)){
+		_CPUHALThreadSuspend(context);
+	}
+
+}
+
+ThreadContext* CPUHALGetSelfContext(){
+	ThreadContext *context = (ThreadContext *) thread_pointer_read();
+	return context;
+}
