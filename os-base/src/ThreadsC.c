@@ -10,6 +10,11 @@ void softwareSwitch(ThreadContext *oldContext, ThreadContext* newContext);
 ThreadQueueManager *mainManager;
 
 
+ThreadQueueManager* getThreadManager(){
+	return mainManager;
+}
+
+
 //This is only run by the main thread of the system
 void _threadInit(ThreadQueueManager *manager){
 
@@ -38,6 +43,7 @@ void _threadInit(ThreadQueueManager *manager){
 
 }
 
+
 ThreadContext* CPUHALQueueThread(volatile ThreadQueue *queue,TCPUStackRef stacktop, TCPUContextEntry entry){
 
 	//If the queue is full, can't add more
@@ -54,11 +60,11 @@ ThreadContext* CPUHALQueueThread(volatile ThreadQueue *queue,TCPUStackRef stackt
 	context->mepcVal = (uint32_t) *entry;
 	context->ready = (int) READY;
 	context->wasSuspended = false;
-	queue->fill++;
+	queue->fill += 1;
 
-	if (free + 1 < MAX_THREADS){
-		free = queue->nextFree++;
-	}
+	// if (free + 1 < MAX_THREADS){
+	// 	free = queue->nextFree++;
+	// }
 	return context;
 }
 
@@ -78,6 +84,10 @@ ThreadContext* CPUHALAddThread(volatile ThreadQueueManager* manager, TCPUStackRe
 
 uint32_t CPUHALRemoveThread(ThreadQueue *queue, uint32_t threadID){
 	return 0;
+}
+
+TCPUStackRef InitializeThreadStack(TCPUStackRef stacktop, TCPUContextEntry entry, void *param){
+	return CPUHALContextInitialize( stacktop, entry, param);
 }
 
 //Called from inside the OS 
@@ -184,21 +194,22 @@ void CPUHALThreadSwitch(volatile ThreadQueueManager* manager){
 			//switch
 
 			//do some bookkeeping on the old queue before switching
-			workingQueue->nextThread = 0;
-			workingQueue->currentThread = -1;
+			workingQueue->nextThread = oldID + 1;
+			if(workingQueue->nextThread >= workingQueue->fill){
+				workingQueue->nextThread = 0;
+			}
+			workingQueue->currentThread = 0;
 
 			//Work on the new queue
 			newID = otherQueue->nextThread;
 			int cyle = newID;
 			while(!found){
-
-
 				if(otherQueue->queue[newID].ready == READY){
 					found = true;
 				}
 				else{
 					newID++;
-					if(newID == otherQueue->fill - 1){
+					if(newID >= otherQueue->fill - 1){
 						// No ready threads found yet, checking the other end
 						newID = 0;
 					}
@@ -278,6 +289,8 @@ void CPUHALThreadSwitch(volatile ThreadQueueManager* manager){
 		}
 	}
 
+	// printf("oldID: %d, newID %d\n",oldID, newID);
+	// fflush(stdout);
 
 	manager->currQueue = newQueue;
 

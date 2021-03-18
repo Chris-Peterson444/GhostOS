@@ -51,6 +51,11 @@ uint32_t c_syscall(uint32_t code, uint32_t a1, uint32_t a2, uint32_t a3, uint32_
         case CLEARTEXT:         a0 = _clearTextScreen();
                                 break;
 
+        case THREADMANAGER:     a0 = _getThreadManager();
+                                break;
+        case TIMERTICKS:        a0 = _getTimerTicks();
+                                break;
+
         default:
                                 a0 = 0;
         break;

@@ -1,21 +1,39 @@
 #include <stdint.h>
+#include <stdio.h>
 #include "GraphicUtil.h"
 #include "SystemUtil.h"
+#include "ThreadInterface.h"
+#include "Sleep.h"
 
 volatile int global = 42;
 volatile uint32_t controller_status = 0; 
 volatile uint32_t status = 5;
-// volatile int time = 0;
-// void timer_callback(void);
-// volatile int gmodeCounter = 0;
-// void graphics_callback(void);
-
-// uint32_t SystemCall(uint32_t param);
-// uint32_t SystemCall(uint32_t param1, uint32_t param2, uint32_t param3, uint32_t param4, uint32_t param5, uint32_t param6);
+extern volatile ThreadQueueManager* threadManager;
+uint32_t mode = 0;
 
 
-// volatile char *VIDEO_MEMORY = (volatile char *)(0x50000000 + 0xFE800);
+uint32_t Thread2(void *ptr){
+    while(1){
+        sleep(2000);
+        graphicsMode(mode);
+        if(mode == 1){
+            mode = 0;
+        }
+        else{
+            mode = 1;
+        }
+    }
+
+}
+
+
 int main() {
+
+    uint32_t Thread1Stack[8192];
+    TCPUStackRef ThreadPointer;
+    ThreadPointer = InitializeThreadStack((TCPUStackRef) (Thread1Stack+8192),Thread2,ThreadPointer);
+    ThreadContext* thread1Context = CPUHALAddThread(threadManager, ThreadPointer,Thread2, APP_THREAD);
+
     int a = 4;
     int b = 12;
     int last_global = 42;

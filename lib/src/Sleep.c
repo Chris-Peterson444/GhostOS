@@ -3,8 +3,9 @@
 #include "Sleep.h"
 #include "Timer.h"
 #include "ChipsetRegisters.h"
+#include "SystemUtil.h"
 
-volatile extern uint32_t TimerTicks;
+uint32_t TimerTicks;
 uint32_t period;
 uint32_t timer_res = TIMER_TICKS_RES;
 long long goalTime;
@@ -16,7 +17,7 @@ Each machine tick has a period of MACHINE_CLOCK_REG in microseconds.
 
 */
 
-uint32_t _sleep(uint32_t miliseconds){
+uint32_t sleep(uint32_t miliseconds){
 	period = (uint32_t) MACHINE_CLOCK_REG;          //Period in microseconds
 	goalTime = miliseconds * 1000;                  //Goal   in microseconds
 	uint32_t lastTick = TimerTicks;
@@ -24,7 +25,7 @@ uint32_t _sleep(uint32_t miliseconds){
 	uint32_t compare = 0;
 
 	while(1){
-		
+		TimerTicks = getTimerTicks();
 		if(goalTime <= compare){
 			break;
 		}

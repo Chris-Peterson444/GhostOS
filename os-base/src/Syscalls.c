@@ -2,7 +2,7 @@
 #include "Syscalls.h"
 #include "ChipsetRegisters.h"
 #include "VideoControllerUtility.h"
-
+#include "Threads.h"
 
 /*
 	Returns the controller status as a (byte-sized) bitmap
@@ -11,7 +11,6 @@ uint32_t  _getControllerStatus(){
 	return  CONTROLLER_STATUS & (uint32_t) 0xFF;
 	
 }
-
 
 uint32_t _setImage(uint32_t image, uint32_t x, uint32_t y, uint32_t z, uint32_t palette){
 	return _imageSet(image, x,  y,  z, palette);
@@ -75,4 +74,13 @@ uint32_t _imageFill(uint32_t background, uint8_t* buff, uint32_t size){
 
 uint32_t _clearTextScreen(){
 	return _clearText();
+}
+
+uint32_t _getThreadManager(){
+	return (uint32_t) getThreadManager();
+}
+
+extern volatile uint32_t TimerTicks;
+uint32_t _getTimerTicks(){
+	return TimerTicks;
 }

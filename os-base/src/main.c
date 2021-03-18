@@ -56,14 +56,14 @@ uint32_t Thread2(void *ptr){
     uint32_t LastTicks = TimerTicks;
     uint32_t seconds = 0;
 
-    ThreadContext* context = CPUHALGetSelfContext();
+    // ThreadContext* context = CPUHALGetSelfContext();
     // printf("Thread 1 context: %08X\n",context);
     // fflush(stdout);
-    CPUHALThreadStatus(context, WAIT);
+    // CPUHALThreadStatus(context, WAIT);
 
     while(1){
 
-        printf("seconds: %d\r",seconds);
+        printf("Seconds waiting: %d\r",seconds);
         fflush(stdout);
 
         _sleep(1000);
@@ -82,25 +82,25 @@ int main() {
     uint32_t LastTicks = 0;
     uint32_t Thread1Stack[8192];
     TCPUStackRef ThreadPointers[2];
-    ThreadPointers[1] = CPUHALContextInitialize((TCPUStackRef)(Thread1Stack+2048),Thread1,ThreadPointers);
+    // ThreadPointers[1] = CPUHALContextInitialize((TCPUStackRef)(Thread1Stack+2048),Thread1,ThreadPointers);
+    ThreadPointers[1] = InitializeThreadStack((TCPUStackRef)(Thread1Stack+2048),Thread1,ThreadPointers);
 
-    printf("Hello World\n");
-
+    printf("GhostOS by Chris Peterson\n");
+    printf("Please insert a cartridge...\n\n");
+    fflush(stdout);
     // for(int i = 0; i < 14; i++){
     //     printf("%2d: %08X @%p\n",13 - i, ThreadPointers[1][13-i],&ThreadPointers[1][13-i]);
     // }
-    ThreadContext* thread1Context = CPUHALAddThread(&TQManager, ThreadPointers[1],Thread2, OS_THREAD);
-    // printf("Thread 1 context: %08X\n",thread1Context);
-    // fflush(stdout);
-    // printf("thread1tp %08X\r",thread1Context);
-    // fflush(stdout);
 
+    ThreadContext* thread1Context = CPUHALAddThread(&TQManager, ThreadPointers[1],Thread2, OS_THREAD);
+    
 
     while (1) {
-        // if(CartridgeInserted){
-        //     _clearText();
-        //     EntryFunction();
-        // }
+        if(CartridgeInserted){
+            CPUHALThreadStatus(thread1Context, WAIT);
+            _clearText();
+            EntryFunction();
+        }
 
         // if(global != last_global){
         //     // old_wait_prog();
@@ -108,14 +108,14 @@ int main() {
         // }
 
                             if(LastTicks != TimerTicks){
-                            printf("M: %d\r",TimerTicks);
-                            fflush(stdout);
+                            // printf("M: %d\r",TimerTicks);
+                            // fflush(stdout);
                             LastTicks = TimerTicks;
 
                             // _sleep(60000);
-                            if (LastTicks = 1000){
-                                CPUHALThreadStatus(thread1Context, READY);
-                            }
+                            // if (LastTicks = 1000){
+                            //     CPUHALThreadStatus(thread1Context, READY);
+                            // }
                             
                         }
 

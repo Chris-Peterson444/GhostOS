@@ -22,6 +22,12 @@ int _write(int file, char *ptr, int len) {
 
 */
 
+// #define TEXT_DATA                      (*((volatile uint32_t *)0x500FE800))
+// #define ROWS_PER_SCREEN               36
+// #define CHARS_PER_ROW                 64
+// #define SCREEN_BUFF_SIZE              2304   // 64 x 36
+
+
 #include "VideoControllerMap.h"
 #include <stdint.h>
 

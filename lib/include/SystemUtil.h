@@ -3,5 +3,7 @@
 #include <stdint.h>
 
 uint32_t  getControllerStatus();
+uint32_t  getThreadQueueManager();
+uint32_t  getTimerTicks();
 
 #endif

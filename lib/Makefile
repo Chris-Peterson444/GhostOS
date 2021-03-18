@@ -26,7 +26,7 @@ CFLAGS   += -O0 -g -ggdb
 else 
 CFLAGS   += -O3
 endif
-
+# CFLAGS   += -ffreestanding  -nostartfiles
 LDFILE   = riscv32-console.ld
 INCLUDE  += -I $(INC_DIR) -I $(OS_INC_DIR)
 ARFLAGS  = -cvq
@@ -35,7 +35,10 @@ ARFLAGS  = -cvq
 TARGET_NAME = libghostutil.a 
 
 TARGET_OBJS =  $(OBJ_DIR)/GraphicUtil.o \
-			   $(OBJ_DIR)/SystemUtil.o
+			   $(OBJ_DIR)/SystemUtil.o  \
+			   $(OBJ_DIR)/Threads.o     \
+			   $(OBJ_DIR)/ThreadsASM.o  \
+			   $(OBJ_DIR)/Sleep.o
 
 NEWLIB_OBJS =   $(OBJ_DIR)/close.o              \
 				$(OBJ_DIR)/environ.o            \
@@ -53,8 +56,8 @@ NEWLIB_OBJS =   $(OBJ_DIR)/close.o              \
 				$(OBJ_DIR)/times.o              \
 				$(OBJ_DIR)/unlink.o             \
 				$(OBJ_DIR)/wait.o               \
-				$(OBJ_DIR)/write.o              \
-				$(OBJ_DIR)/sbrk.o               
+				$(OBJ_DIR)/write.o              
+# 				$(OBJ_DIR)/sbrk.o               
 
 ALL_OBJS = $(TARGET_OBJS) $(NEWLIB_OBJS)
 

@@ -13,6 +13,8 @@
 #define FILLPALETTE                10
 #define FILLIMAGE                  11
 #define CLEARTEXT                  12
+#define THREADMANAGER              13
+#define TIMERTICKS                 14
 
 
 #endif

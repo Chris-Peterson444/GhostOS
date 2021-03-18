@@ -67,7 +67,6 @@ void CPUHALThreadStatus(ThreadContext* context, int ready);
 ThreadContext* CPUHALGetSelfContext();
 void _CPUHALThreadSuspend(ThreadContext* context);
 
-
 TCPUStackRef InitializeThreadStack(TCPUStackRef stacktop, TCPUContextEntry entry, void *param);
 
 
